@@ -7,10 +7,31 @@
 [![Coveralls][BadgeCoveralls]][Coveralls]
 
 
-
 ## Quick Example
 
 ```
+const Seneca = require('seneca')
+
+Seneca()
+    .use('member')
+    .act({
+      role: 'member',
+      cmd: 'add',
+      parent:'p001', 
+      child:'c001', 
+      kind:'group', 
+      code:'admin', 
+      tags:['foo','bar']
+      },
+      function(err, out) {
+        console.log(out)
+      })
+```
+
+## Install
+
+```sh
+$ npm install seneca-member
 ```
 
 
