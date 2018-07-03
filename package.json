@@ -4,7 +4,7 @@
   "description": "Seneca plugin for generic membership.",
   "main": "member.js",
   "scripts": {
-    "test": "lab -P test -t 80 -I URL,URLSearchParams",
+    "test": "lab -P test -t 80 -I URL,URLSearchParams,BigUint64Array, BigInt64Array, BigInt",
     "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js",
     "coveralls": "lab -s -P test -r lcov | coveralls"
   },
@@ -25,7 +25,7 @@
     "lib/errors.js"
   ],
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "dependencies": {
     "optioner": "1.1"
