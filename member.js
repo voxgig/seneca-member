@@ -74,52 +74,59 @@ module.exports = function member(options) {
   
   function list_children(msg, reply) {
     const seneca = this
-    work().then(reply).catch(reply)
+    build_list(seneca,msg,'c').then(reply).catch(reply)
   
-    async function work() {
-      const member_ent = WE(seneca.make('sys/member'))
-
-      const fields = []
-      const q = {}
-
-      if(null != msg.parent) {
-        q.p = msg.parent
-      }
-      if(null != msg.kind) {
-        q.k = msg.kind
-      }
-      if(null != msg.code) {
-        q.d = msg.code
-      }
-      
-      var list = await member_ent.list$(q)
-      //console.log('LIST',q,list)
-      
-      var seen = {}
-      list = list.filter(x => seen[x.c] ? false : seen[x.c] = true)
-
-      if(null == msg.as || 'child-id' == msg.as) {
-        list = list.map(x=>x.c)
-      }
-      if('member-id' == msg.as) {
-        list = list.map(x=>x.id)
-      }
-      else if('member' == msg.as) {
-        // use list as is
-      }
-      else if('child' == msg.as) {
-        list = await load_items(seneca,list,'c')
-      }
-      
-      return {items:list}
-    }    
   }
 
   function list_parents(msg, reply) {
-
+    build_list(seneca,msg,'p').then(reply).catch(reply)
   }
 
-  async function load_items(seneca, list, type) {
+
+  async function build_list(seneca,msg,type) {
+    const member_ent = WE(seneca.make('sys/member'))
+
+    const fields = []
+    const q = {}
+
+    if('c' === type && null != msg.parent) {
+      q.p = msg.parent
+    }
+    if('p' === type && null != msg.child) {
+      q.c = msg.child
+    }
+    if(null != msg.kind) {
+      q.k = msg.kind
+    }
+    if(null != msg.code) {
+      q.d = msg.code
+    }
+    
+    var list = await member_ent.list$(q)
+    
+    var seen = {}
+    list = list.filter(x => seen[x[type]] ? false : seen[x[type]] = true)
+
+    const prefix = 'c' === type ? 'child' : 'parent'
+    
+    if(null == msg.as || prefix+'-id' == msg.as) {
+      list = list.map(x=>x[type])
+    }
+    if('member-id' == msg.as) {
+      list = list.map(x=>x.id)
+    }
+    else if('member' == msg.as) {
+      // use list as is
+    }
+    else if(prefix == msg.as) {
+      list = await load_items(seneca,list,msg,type)
+    }
+    
+    return {items:list}
+  }    
+
+  
+  async function load_items(seneca, list, msg, type) {
     const out = []
 
     for(var i = 0; i < list.length; i++) {
@@ -128,7 +135,15 @@ module.exports = function member(options) {
       var ent = WE(seneca.make(canon))
       var entid = list[i][type]
 
-      out.push( await ent.load$(entid) )
+      var q = {id:entid}
+      if(msg.fields) {
+        q.fields$ = msg.fields
+      }
+
+      var found = (await ent.list$(q))[0]
+      if(found) {
+        out.push(found)
+      }
     }
 
     return out

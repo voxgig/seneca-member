@@ -94,6 +94,84 @@ lab.test('list-children', fin => {
 })
 
 
+lab.test('list-parents', fin => {
+  make_data0(make_instance(fin), function(si) {
+    si
+      .gate()
+
+      .act('role:member,list:parents', function(err, out) {
+        expect(out.items).equal([ 'p0', 'p1', 'p2' ])
+      })
+
+      .act('role:member,list:parents,child:c0', function(err, out) {
+        expect(out.items).equal([ 'p0', 'p1' ])
+      })
+
+      .act('role:member,list:parents,child:c2', function(err, out) {
+        expect(out.items).equal([ 'p0', 'p2' ])
+      })
+
+
+      .act('role:member,list:parents,child:c0,kind:k0', function(err, out) {
+        expect(out.items).equal([ 'p0', 'p1' ])
+      })
+      .act('role:member,list:parents,child:c0,kind:k0,code:d0', function(err, out) {
+        expect(out.items).equal([ 'p0', 'p1' ])
+      })
+
+
+      .act('role:member,list:parents,child:c0,kind:k0,code:d0,as:parent-id', function(err, out) {
+        expect(out.items).equal([ 'p0', 'p1' ])
+      })
+      .act('role:member,list:parents,child:c0,kind:k0,code:d0,as:member-id', function(err, out) {
+        expect(out.items).equal([ 'm0', 'm4' ])
+      })
+      .act('role:member,list:parents,child:c0,kind:k0,code:d0,as:member', function(err, out) {
+        expect(out.items.map(x=>x.id)).equal([ 'm0', 'm4' ])
+      })
+
+      .act('role:member,list:parents,child:c0,kind:k0,code:d0,as:parent', function(err, out) {
+        expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f0:0,f1:a}')
+        expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f0:1,f1:b}')
+      })
+
+      .ready(fin)
+  })
+})
+
+
+// TODO: mem-store needs to support fields$
+// TODO: add to standard entity tests
+lab.test('fields', fin => {
+  make_data0(make_instance(fin), function(si) {
+    si
+      .gate()
+
+      .act(
+        'role:member,list:children,parent:p0,kind:k0,code:d0,as:child',
+        {fields:['f2']},
+        function(err, out) {
+          // TODO: uncomment once mem-store updated
+          //expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100}')
+          //expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101}')
+        })
+
+      .act(
+        'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent',
+        {fields:['f1']},
+        function(err, out) {
+          // TODO: uncomment once mem-store updated
+          //expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f1:a}')
+          //expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f1:b}')
+        })
+
+      .ready(fin)
+  })
+})
+
+
+
+
 lab.test('intern', fin => {
   expect(Plugin.intern).exists()
   fin()
@@ -111,6 +189,7 @@ function make_data0(si, done) {
   async function work() {
     await foo_ent.make$().data$({id$:'p0',f0:0,f1:'a'}).save$()
     await foo_ent.make$().data$({id$:'p1',f0:1,f1:'b'}).save$()
+    await foo_ent.make$().data$({id$:'p2',f0:2,f1:'c'}).save$()
 
     await bar_ent.make$().data$({id$:'c0',f2:100,f3:'A'}).save$()
     await bar_ent.make$().data$({id$:'c1',f2:101,f3:'B'}).save$()
@@ -142,6 +221,10 @@ function make_data0(si, done) {
     const m5 = await act(
       'role:member,add:member',
       {id:'m5', parent:'p1', child:'c4', kind:'k0', code:'d0', tags:['t1']})
+
+    const m6 = await act(
+      'role:member,add:member',
+      {id:'m6', parent:'p2', child:'c2', kind:'k2', code:'d3', tags:['t3']})
 
     return si
   }
