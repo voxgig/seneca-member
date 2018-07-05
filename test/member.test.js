@@ -151,18 +151,16 @@ lab.test('fields', fin => {
         'role:member,list:children,parent:p0,kind:k0,code:d0,as:child',
         {fields:['f2']},
         function(err, out) {
-          // TODO: uncomment once mem-store updated
-          //expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100}')
-          //expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101}')
+          expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100}')
+          expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101}')
         })
 
       .act(
         'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent',
         {fields:['f1']},
         function(err, out) {
-          // TODO: uncomment once mem-store updated
-          //expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f1:a}')
-          //expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f1:b}')
+          expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f1:a}')
+          expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f1:b}')
         })
 
       .ready(fin)
