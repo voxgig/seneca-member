@@ -168,6 +168,40 @@ lab.test('fields', fin => {
 })
 
 
+lab.test('update', fin => {
+  const si = make_instance(fin)
+  const act = W(si.act.bind(si))
+  
+  work().then(fin).catch(fin)
+
+  async function work() {  
+    const m0 = await act(
+      'role:member,add:member',
+      {id:'m0', parent:'p0', child:'c0', kind:'k0', code:'d0', tags:['t0']})
+
+    expect(m0.d).equals('d0')
+    expect(m0.t).equals(['t0'])
+    
+    const m0x = await act(
+      'role:member,update:member',
+      {id:m0.id, code:'d0x', tags:['t0x']})
+    
+    expect(m0x.d).equals('d0x')
+    expect(m0x.t).equals(['t0x'])
+
+    await act(
+      'role:member,update:member,remove:true',
+      {id:m0.id})
+
+    const m0xr = await act(
+      'role:member,update:member',
+      {id:m0.id})
+
+    expect(m0xr).not.exist()
+  }
+})
+
+
 
 
 lab.test('intern', fin => {

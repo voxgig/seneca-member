@@ -29,6 +29,7 @@ module.exports = function member(options) {
 
   seneca
     .add('role:member,add:member', add_member)
+    .add('role:member,update:member', update_member)
     .add('role:member,list:children', list_children)
     .add('role:member,list:parents', list_parents)
 
@@ -72,6 +73,37 @@ module.exports = function member(options) {
     }
   }
   
+
+  function update_member(msg, reply) {
+    const seneca = this
+    work().then(reply).catch(reply)
+  
+    async function work() {
+      const member_ent = WE(seneca.make('sys/member'))
+
+      if(msg.remove) {
+        return await WE(member_ent.make$()).remove$(msg.id)
+      }
+      else {
+        var member = await WE(member_ent.make$()).load$(msg.id)
+
+        if(member) {
+          member.p = null == msg.parent ? member.p : msg.parent
+          member.c = null == msg.child ? member.c : msg.child
+          member.k = null == msg.kind ? member.k : msg.kind
+          member.d = null == msg.code ? member.d : msg.code
+          member.t = null == msg.tags ? member.t : msg.tags
+          
+          member = await WE(member).save$()
+        }
+
+        return member
+      }
+    }
+  }
+
+
+
   function list_children(msg, reply) {
     const seneca = this
     build_list(seneca,msg,'c').then(reply).catch(reply)
