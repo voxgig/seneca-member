@@ -141,15 +141,22 @@ module.exports = function member(options) {
 
     const prefix = 'c' === type ? 'child' : 'parent'
     
+    // Return referenced entity ids
     if(null == msg.as || prefix+'-id' == msg.as) {
       list = list.map(x=>x[type])
     }
-    if('member-id' == msg.as) {
+
+    // Return sys/member ids
+    else if('member-id' == msg.as) {
       list = list.map(x=>x.id)
     }
+
+    // Return sys/member ents
     else if('member' == msg.as) {
       // use list as is
     }
+
+    // Return referenced entities
     else if(prefix == msg.as) {
       list = await load_items(seneca,list,msg,type)
     }
