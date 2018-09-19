@@ -84,11 +84,21 @@ lab.test('list-children', fin => {
       })
 
       .act('role:member,list:children,parent:p0,kind:k0,code:d0,as:child', function(err, out) {
-        //console.log(out)
         expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100,f3:A}')
         expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101,f3:B}')
       })
 
+      .act('role:member,list:children,parent:not-a-parent', function(err, out) {
+        expect(out.items).equal([])
+      })
+      .act('role:member,list:children,parent:p0,kind:not-a-kind', function(err, out) {
+        expect(out.items).equal([])
+      })
+      .act('role:member,list:children,parent:p0,kind:k0,code:not-a-code', function(err, out) {
+        expect(out.items).equal([])
+      })
+
+    
       .ready(fin)
   })
 })
@@ -188,7 +198,22 @@ lab.test('update', fin => {
     
     expect(m0x.d).equals('d0x')
     expect(m0x.t).equals(['t0x'])
+    expect(m0x.p).equals('p0')
+    expect(m0x.c).equals('c0')
+    expect(m0x.k).equals('k0')
 
+    
+    const m0x2 = await act(
+      'role:member,update:member',
+      {id:m0.id, parent:'p1', child:'c1', kind:'k1' })
+    
+    expect(m0x2.d).equals('d0x')
+    expect(m0x2.t).equals(['t0x'])
+    expect(m0x2.p).equals('p1')
+    expect(m0x2.c).equals('c1')
+    expect(m0x2.k).equals('k1')
+
+    
     await act(
       'role:member,update:member,remove:true',
       {id:m0.id})
@@ -199,6 +224,32 @@ lab.test('update', fin => {
 
     expect(m0xr).not.exist()
   }
+})
+
+
+lab.test('kinds', fin => {
+  make_instance(fin)
+    .gate()
+    .act('role:member,add:kinds',
+         {kinds: { ak0: {p:'p0', c:'c0'}, ak1: {p:'p0', c:'c1'} }},
+         function(err, out) {
+           expect(out).exist()
+           expect(out).includes({
+             kinds: { k0: { p: 'foo', c: 'bar' },
+                      k1: { p: 'foo', c: 'zed' },
+                      ak0: { p: 'p0', c: 'c0' },
+                      ak1: { p: 'p0', c: 'c1' } } })
+         })
+    .act('role:member,get:kinds',
+         function(err, out) {
+           expect(out).exist()
+           expect(out).includes({
+             kinds: { k0: { p: 'foo', c: 'bar' },
+                      k1: { p: 'foo', c: 'zed' },
+                      ak0: { p: 'p0', c: 'c0' },
+                      ak1: { p: 'p0', c: 'c1' } } })
+         })
+    .ready(fin)
 })
 
 

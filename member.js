@@ -28,10 +28,33 @@ module.exports = function member(options) {
   const opts = optioner.check(options)
 
   seneca
+    .add('role:member,add:kinds', add_kinds)
+    .add('role:member,get:kinds', get_kinds)
     .add('role:member,add:member', add_member)
     .add('role:member,update:member', update_member)
     .add('role:member,list:children', list_children)
     .add('role:member,list:parents', list_parents)
+
+
+  function add_kinds(msg, reply) {
+    const seneca = this
+    work().then(reply).catch(reply)
+  
+    async function work() {
+      opts.kinds = Object.assign(opts.kinds,msg.kinds)
+      return { kinds: opts.kinds }
+    }
+  }
+
+
+  function get_kinds(msg, reply) {
+    const seneca = this
+    work().then(reply).catch(reply)
+  
+    async function work() {
+      return { kinds: opts.kinds }
+    }
+  }
 
   
   function add_member(msg, reply) {
