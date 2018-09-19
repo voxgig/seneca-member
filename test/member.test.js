@@ -20,13 +20,19 @@ lab.test('validate', PluginValidator(Plugin, module))
 
 lab.test('happy', fin => {
   make_instance(fin)
+    .gate()
     .act('role:member,add:member',
          {parent:'p0', child:'c0', kind:'group', code:'admin', tags:['foo','bar']},
          function(err, out) {
            expect(out).exist()
            expect(out).includes({p:'p0',c:'c0',k:'group',d:'admin',t:['foo','bar']})
-           fin()
          })
+    .act('role:member,is:member',
+         {parent:'p0', child:'c0', kind:'group'},
+         function(err, out) {
+           expect(out.member).true()
+         })
+    .ready(fin)
 })
 
 lab.test('no-dups', fin => {

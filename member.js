@@ -1,6 +1,8 @@
 /* Copyright (c) 2018 voxgig and other contributors, MIT License */
 'use strict'
 
+// TODO: ensure tags don't get obliterated
+
 const Util = require('util')
 
 const Optioner = require('optioner')
@@ -31,6 +33,7 @@ module.exports = function member(options) {
     .add('role:member,add:kinds', add_kinds)
     .add('role:member,get:kinds', get_kinds)
     .add('role:member,add:member', add_member)
+    .add('role:member,is:member', is_member)
     .add('role:member,remove:member', remove_member)
     .add('role:member,update:member', update_member)
     .add('role:member,list:children', list_children)
@@ -95,6 +98,35 @@ module.exports = function member(options) {
       }
 
       return member
+    }
+  }
+
+
+  function is_member(msg, reply) {
+    const seneca = this
+    work().then(reply).catch(reply)
+  
+    async function work() {
+      const member_ent = WE(seneca.make('sys/member'))
+
+      // required
+      const q = {
+        p: msg.parent,
+        c: msg.child,
+      }
+
+      // TODO: should this be optional?
+      if(msg.kind) {
+        q.k = msg.kind
+      }
+
+      if(msg.code) {
+        q.d = msg.code
+      }
+
+      const member = await member_ent.load$(q)
+
+      return {member: !!member, q: q}
     }
   }
 
