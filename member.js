@@ -31,6 +31,7 @@ module.exports = function member(options) {
     .add('role:member,add:kinds', add_kinds)
     .add('role:member,get:kinds', get_kinds)
     .add('role:member,add:member', add_member)
+    .add('role:member,remove:member', remove_member)
     .add('role:member,update:member', update_member)
     .add('role:member,list:children', list_children)
     .add('role:member,list:parents', list_parents)
@@ -56,7 +57,8 @@ module.exports = function member(options) {
     }
   }
 
-  
+
+  // idemptotent
   function add_member(msg, reply) {
     const seneca = this
     work().then(reply).catch(reply)
@@ -95,6 +97,36 @@ module.exports = function member(options) {
       return member
     }
   }
+
+
+  function remove_member(msg, reply) {
+    const seneca = this
+    work().then(reply).catch(reply)
+  
+    async function work() {
+      const member_ent = WE(seneca.make('sys/member'))
+
+      // required
+      const q = {
+        c: msg.child,
+        k: msg.kind
+      }
+
+      if(msg.parent) {
+        q.p = msg.parent
+      }
+
+      if(msg.code) {
+        q.d = msg.code
+      }
+
+      const list = await member_ent.list$(q)
+
+      for(var i = 0; i < list.length; i++) {
+        await WE(list[i]).remove$()
+      }
+    }
+  }
   
 
   function update_member(msg, reply) {
@@ -104,6 +136,7 @@ module.exports = function member(options) {
     async function work() {
       const member_ent = WE(seneca.make('sys/member'))
 
+      // TODO: remove as replaced by role:member,remove:member
       if(msg.remove) {
         return await WE(member_ent.make$()).remove$(msg.id)
       }

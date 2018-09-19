@@ -227,6 +227,53 @@ lab.test('update', fin => {
 })
 
 
+lab.test('remove', fin => {
+  const si = make_instance(fin)
+  const act = W(si.act.bind(si))
+  
+  work().then(fin).catch(fin)
+
+  async function work() {  
+    const m0 = await act(
+      'role:member,add:member',
+      {id:'m0', parent:'p0', child:'c0', kind:'k0', code:'d0'})
+
+    const m1 = await act(
+      'role:member,add:member',
+      {id:'m1', parent:'p0', child:'c1', kind:'k0', code:'d0'})
+
+    var list = await act('role:member,list:children,parent:p0')
+    expect(list.items).equal(['c0', 'c1'])
+
+    await act('role:member,remove:member,child:c0,kind:k0')
+
+    list = await act('role:member,list:children,parent:p0')
+    expect(list.items).equal(['c1'])
+
+    
+    // multiple parents, specific code
+
+    await act(
+      'role:member,add:member',
+      {id:'m2a', parent:'p1', child:'c2', kind:'k1', code:'d1'})
+    await act(
+      'role:member,add:member',
+      {id:'m2b', parent:'p2', child:'c2', kind:'k1', code:'d1'})
+
+    list = await act('role:member,list:parents,child:c2,kind:k1,code:d1')
+    expect(list.items).equal(['p1','p2'])
+
+    await act('role:member,remove:member,child:c2,kind:k1,code:d1')
+
+    list = await act('role:member,list:children,parent:p1')
+    expect(list.items).equal([])
+
+    list = await act('role:member,list:children,parent:p2')
+    expect(list.items).equal([])
+  }
+})
+
+
 lab.test('kinds', fin => {
   make_instance(fin)
     .gate()
