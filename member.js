@@ -111,11 +111,13 @@ module.exports = function member(options) {
 
       // required
       const q = {
-        p: msg.parent,
-        c: msg.child,
+        p: msg.parent
       }
 
-      // TODO: should this be optional?
+      if(msg.child) {
+        q.c = msg.child
+      }
+
       if(msg.kind) {
         q.k = msg.kind
       }
@@ -127,7 +129,7 @@ module.exports = function member(options) {
       const member = await member_ent.load$(q)
       var child = []
       
-      if('child' === msg.as) {
+      if(member && 'child' === msg.as) {
         child = await load_items(seneca, [member], msg, 'c')
       }
       
