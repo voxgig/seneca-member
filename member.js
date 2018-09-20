@@ -157,6 +157,8 @@ module.exports = function member(options) {
       for(var i = 0; i < list.length; i++) {
         await WE(list[i]).remove$()
       }
+
+      return {items:list}
     }
   }
   
