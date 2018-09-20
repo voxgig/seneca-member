@@ -125,8 +125,13 @@ module.exports = function member(options) {
       }
 
       const member = await member_ent.load$(q)
-
-      return {member: !!member, q: q}
+      var child = []
+      
+      if('child' === msg.as) {
+        child = await load_items(seneca, [member], msg, 'c')
+      }
+      
+      return {member: member, child: child[0], q: q}
     }
   }
 
