@@ -14,6 +14,7 @@ var Errors = require('./lib/errors')
 
 const W = Util.promisify
 
+const SYS_MEMBER_SV = 0
 
 const optioner = Optioner({
   kinds:{}
@@ -69,12 +70,13 @@ module.exports = function member(options) {
     async function work() {
       const member_ent = WE(seneca.make('sys/member'))
 
-      const prev = await WE(member_ent.make$()).load$({
+      const q = {
         p: msg.parent,
         c: msg.child,
         k: msg.kind,
         d: msg.code,
-      })
+      }
+      const prev = await WE(member_ent.make$()).load$(q)
 
       var member
       
@@ -89,11 +91,13 @@ module.exports = function member(options) {
           c: msg.child,
           k: msg.kind,
           d: msg.code,
-          t: msg.tags
+          t: msg.tags,
+          sv: SYS_MEMBER_SV
         }
         if(msg.id) {
           data.id$ = msg.id
         }
+
         member = await WE(member_ent.make$()).data$(data).save$()
       }
 

@@ -97,7 +97,7 @@ lab.test('list-children', fin => {
       .act('role:member,is:member,parent:p0,child:c0,as:child,fields:["f2"]', function(err, out) {
         expect(out.q).equal({ p: 'p0', c: 'c0' })
         expect(out.member.toString())
-          .equal('$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0]}')
+          .equal('$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0],sv:0}')
         expect(out.child.toString())
           .equal('$-/-/bar;id=c0;{f2:100}')
       })
@@ -105,7 +105,7 @@ lab.test('list-children', fin => {
       .act('role:member,is:member,parent:p0,code:d0,as:child,fields:["f2"]', function(err, out) {
         expect(out.q).equal({ p: 'p0', d: 'd0' })
         expect(out.member.toString())
-          .equal('$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0]}')
+          .equal('$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0],sv:0}')
         expect(out.child.toString())
           .equal('$-/-/bar;id=c0;{f2:100}')
       })
