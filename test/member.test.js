@@ -35,6 +35,24 @@ lab.test('happy', fin => {
     .ready(fin)
 })
 
+lab.test('validate', fin => {
+  make_instance(fin,{validate:true})
+    .gate()
+    .act('role:member,add:member',
+         {parent:'p0', child:'c0', kind:'group', code:'admin', tags:['foo','bar']},
+         function(err, out) {
+           expect(out).exist()
+           expect(out).includes({p:'p0',c:'c0',k:'group',d:'admin',t:['foo','bar']})
+         })
+    .act('role:member,is:member',
+         {parent:'p0', child:'c0', kind:'group'},
+         function(err, out) {
+           expect(out.member).exists()
+         })
+    .ready(fin)
+})
+
+
 lab.test('no-dups', fin => {
   make_instance(fin)
     .act('role:member,add:member',
@@ -200,8 +218,27 @@ lab.test('fields', fin => {
 })
 
 
+lab.test('bad-update', fin => {
+  const si = make_instance(null,{validate:true}).quiet()
+  const act = W(si.act.bind(si))
+  
+  work().then(fin).catch(fin)
+
+  async function work() {  
+    try {
+      await act(
+      'role:member,add:member',
+      {id:'m0', parent:'p0', child:'c0'})
+      expect(true).false()
+    }
+    catch(e) {
+      expect(e.code).equal('act_invalid_msg')
+    }
+  }
+})
+         
 lab.test('update', fin => {
-  const si = make_instance(fin)
+  const si = make_instance(fin,{validate:true})
   const act = W(si.act.bind(si))
   
   work().then(fin).catch(fin)
@@ -384,9 +421,15 @@ function make_data0(si, done) {
 
 
 
-function make_instance(fin) {
-  return Seneca()
-    .test(fin)
+function make_instance(fin, flags) {
+  flags = flags || {}
+  var si = Seneca().test(fin)
+
+  if(flags.validate) {
+    si.use('seneca-joi')
+  }
+
+  return si
     .use('entity')
     .use(Plugin, {
       kinds: {

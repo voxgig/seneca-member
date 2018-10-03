@@ -30,16 +30,35 @@ module.exports = function member(options) {
   const seneca = this
   const opts = optioner.check(options)
 
-  seneca
-    .add('role:member,add:kinds', add_kinds)
-    .add('role:member,get:kinds', get_kinds)
-    .add('role:member,add:member', add_member)
-    .add('role:member,is:member', is_member)
-    .add('role:member,remove:member', remove_member)
-    .add('role:member,update:member', update_member)
-    .add('role:member,list:children', list_children)
-    .add('role:member,list:parents', list_parents)
+  function define_patterns() {
+    seneca
+      .add('role:member,add:kinds', add_kinds)
+      .add('role:member,get:kinds', get_kinds)
+      .add('role:member,add:member', add_member)
+      .add('role:member,is:member', is_member)
+      .add('role:member,remove:member', remove_member)
+      .add('role:member,update:member', update_member)
+      .add('role:member,list:children', list_children)
+      .add('role:member,list:parents', list_parents)
+  }
 
+
+  const validate_member = {
+    parent: Joi.string(),
+    child: Joi.string(),
+    kind: Joi.string(),
+    code: Joi.string(),
+    tags: Joi.array().items(Joi.string())
+  }
+
+
+  
+  add_kinds.validate = {
+    kinds: Joi.object().pattern(/./, Joi.object().unknown(false).keys({
+      p: Joi.string().required(),
+      c: Joi.string().required()
+    }))
+  }
 
   function add_kinds(msg, reply) {
     const seneca = this
@@ -61,6 +80,13 @@ module.exports = function member(options) {
     }
   }
 
+
+
+  add_member.validate = Object.assign({}, validate_member, {
+    parent: Joi.string().required(),
+    child: Joi.string().required(),
+    kind: Joi.string().required(),
+  })
 
   // idemptotent
   function add_member(msg, reply) {
@@ -106,6 +132,11 @@ module.exports = function member(options) {
   }
 
 
+
+  is_member.validate = Object.assign({}, validate_member, {
+    parent: Joi.string().required(),
+  })
+
   function is_member(msg, reply) {
     const seneca = this
     work().then(reply).catch(reply)
@@ -142,6 +173,11 @@ module.exports = function member(options) {
   }
 
 
+  remove_member.validate = Object.assign({}, validate_member, {
+    child: Joi.string().required(),
+    kind: Joi.string().required(), // to identify specific membership
+  })
+
   function remove_member(msg, reply) {
     const seneca = this
     work().then(reply).catch(reply)
@@ -172,7 +208,12 @@ module.exports = function member(options) {
       return {items:list}
     }
   }
+
   
+  update_member.validate = Object.assign({}, validate_member, {
+    id: Joi.string().required(),
+  })
+
 
   function update_member(msg, reply) {
     const seneca = this
@@ -203,13 +244,18 @@ module.exports = function member(options) {
     }
   }
 
-
+  
+  list_children.validate = Object.assign({}, validate_member, {
+  })
 
   function list_children(msg, reply) {
     const seneca = this
     build_list(seneca,msg,'c').then(reply).catch(reply)
   
   }
+
+  list_parents.validate = Object.assign({}, validate_member, {
+  })
 
   function list_parents(msg, reply) {
     build_list(seneca,msg,'p').then(reply).catch(reply)
@@ -288,11 +334,8 @@ module.exports = function member(options) {
 
     return out
   }
-  
-  return {
-    export: {
-    }
-  }
+
+  return define_patterns()
 }
 
 const intern = (module.exports.intern = {

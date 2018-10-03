@@ -1,6 +1,6 @@
 {
   "name": "seneca-member",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Seneca plugin for generic membership.",
   "main": "member.js",
   "scripts": {
@@ -40,6 +40,7 @@
     "prettier": "1",
     "seneca": "github:senecajs/seneca",
     "seneca-entity": "2",
+    "seneca-joi": "2",
     "seneca-plugin-validator": "0"
   }
 }
