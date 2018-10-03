@@ -219,7 +219,8 @@ lab.test('fields', fin => {
 
 
 lab.test('bad-update', fin => {
-  const si = make_instance(null,{validate:true}).quiet()
+  const si = make_instance(null,{validate:true})
+  si.quiet && si.quiet()
   const act = W(si.act.bind(si))
   
   work().then(fin).catch(fin)
