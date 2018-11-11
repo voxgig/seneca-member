@@ -2,6 +2,7 @@
 'use strict'
 
 // TODO: ensure tags don't get obliterated
+// TODO: check kind has been defined
 
 const Util = require('util')
 
@@ -258,6 +259,7 @@ module.exports = function member(options) {
   })
 
   function list_parents(msg, reply) {
+    const seneca = this
     build_list(seneca,msg,'p').then(reply).catch(reply)
   }
 
