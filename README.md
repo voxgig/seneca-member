@@ -7,6 +7,13 @@
 [![Coveralls][BadgeCoveralls]][Coveralls]
 
 
+## Install
+
+```sh
+$ npm install seneca-promisify seneca-member
+```
+
+
 ## Quick Example
 
 ```
@@ -22,17 +29,17 @@ Seneca()
       kind:'group', 
       code:'admin', 
       tags:['foo','bar']
-      },
-      function(err, out) {
-        console.log(out)
-      })
+    },
+    function(err, out) {
+      console.log(out)
+    })
 ```
 
-## Install
 
-```sh
-$ npm install seneca-member
-```
+## Data Model
+
+
+
 
 
 ## Inbound Messages

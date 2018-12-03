@@ -6,41 +6,31 @@
 
 const Util = require('util')
 
-const Optioner = require('optioner')
-const Eraro = require('eraro')
+const Joi = require('joi')
 
-const Joi = Optioner.Joi
-
-var Errors = require('./lib/errors')
-
-const W = Util.promisify
-
+// Semantic Version of sys/member entities
 const SYS_MEMBER_SV = 0
 
-const optioner = Optioner({
+
+module.exports = member
+
+member.defaults = {
   kinds:{}
-})
+}
 
-var error = (exports.error = Eraro({
-  package: 'seneca',
-  msgmap: Errors,
-  override: true
-}))
-
-module.exports = function member(options) {
+function member(opts) {
   const seneca = this
-  const opts = optioner.check(options)
 
   function define_patterns() {
     seneca
-      .add('role:member,add:kinds', add_kinds)
-      .add('role:member,get:kinds', get_kinds)
-      .add('role:member,add:member', add_member)
-      .add('role:member,is:member', is_member)
-      .add('role:member,remove:member', remove_member)
-      .add('role:member,update:member', update_member)
-      .add('role:member,list:children', list_children)
-      .add('role:member,list:parents', list_parents)
+      .message('role:member,add:kinds', add_kinds)
+      .message('role:member,get:kinds', get_kinds)
+      .message('role:member,add:member', add_member)
+      .message('role:member,is:member', is_member)
+      .message('role:member,remove:member', remove_member)
+      .message('role:member,update:member', update_member)
+      .message('role:member,list:children', list_children)
+      .message('role:member,list:parents', list_parents)
   }
 
 
@@ -53,7 +43,6 @@ module.exports = function member(options) {
   }
 
 
-  
   add_kinds.validate = {
     kinds: Joi.object().pattern(/./, Joi.object().unknown(false).keys({
       p: Joi.string().required(),
@@ -61,24 +50,14 @@ module.exports = function member(options) {
     }))
   }
 
-  function add_kinds(msg, reply) {
-    const seneca = this
-    work().then(reply).catch(reply)
-  
-    async function work() {
-      opts.kinds = Object.assign(opts.kinds,msg.kinds)
-      return { kinds: opts.kinds }
-    }
+  async function add_kinds(msg, reply) {
+    opts.kinds = Object.assign(opts.kinds,msg.kinds)
+    return { kinds: opts.kinds }
   }
 
 
-  function get_kinds(msg, reply) {
-    const seneca = this
-    work().then(reply).catch(reply)
-  
-    async function work() {
-      return { kinds: opts.kinds }
-    }
+  async function get_kinds(msg, reply) {
+    return { kinds: opts.kinds }
   }
 
 
@@ -89,103 +68,93 @@ module.exports = function member(options) {
     kind: Joi.string().required(),
   })
 
-  // idemptotent
-  function add_member(msg, reply) {
-    const seneca = this
-    work().then(reply).catch(reply)
-  
-    async function work() {
-      const member_ent = WE(seneca.make('sys/member'))
 
-      const q = {
+  // idemptotent
+  async function add_member(msg, reply) {
+    const member_ent = this.entity('sys/member')
+
+    const q = {
+      p: msg.parent,
+      c: msg.child,
+      k: msg.kind,
+      d: msg.code,
+    }
+    const prev = await member_ent.make$().load$(q)
+
+    var member
+    
+    if(prev) {
+      member = await prev.data$({
+        t: msg.tags
+      }).save$()
+    }
+    else {
+      const data = {
         p: msg.parent,
         c: msg.child,
         k: msg.kind,
         d: msg.code,
+        t: msg.tags,
+        sv: SYS_MEMBER_SV
       }
-      const prev = await WE(member_ent.make$()).load$(q)
-
-      var member
-      
-      if(prev) {
-        member = await WE(prev).data$({
-          t: msg.tags
-        }).save$()
-      }
-      else {
-        const data = {
-          p: msg.parent,
-          c: msg.child,
-          k: msg.kind,
-          d: msg.code,
-          t: msg.tags,
-          sv: SYS_MEMBER_SV
-        }
-        if(msg.id) {
-          data.id$ = msg.id
-        }
-
-        member = await WE(member_ent.make$()).data$(data).save$()
+      if(msg.id) {
+        data.id$ = msg.id
       }
 
-      return member
+      member = await member_ent.make$().data$(data).save$()
     }
-  }
 
+    return member
+  }
 
 
   is_member.validate = Object.assign({}, validate_member, {
     parent: Joi.string().required(),
   })
 
-  function is_member(msg, reply) {
-    const seneca = this
-    work().then(reply).catch(reply)
-  
-    async function work() {
-      const member_ent = WE(seneca.make('sys/member'))
+  async function is_member(msg, reply) {
+    const member_ent = this.entity('sys/member')
 
-      // required
-      const q = {
-        p: msg.parent
-      }
-
-      if(msg.child) {
-        q.c = msg.child
-      }
-
-      if(msg.kind) {
-        q.k = msg.kind
-      }
-
-      if(msg.code) {
-        q.d = msg.code
-      }
-
-      const member = await member_ent.load$(q)
-      var child = []
-      
-      if(member && 'child' === msg.as) {
-        child = await load_items(seneca, [member], msg, 'c')
-      }
-      
-      return {member: member, child: child[0], q: q}
+    // required
+    const q = {
+      p: msg.parent
     }
+
+    if(msg.child) {
+      q.c = msg.child
+    }
+
+    if(msg.kind) {
+      q.k = msg.kind
+    }
+
+    if(msg.code) {
+      q.d = msg.code
+    }
+
+    const member = await member_ent.load$(q)
+    var child = []
+    
+    if(member && 'child' === msg.as) {
+      child = await load_items(seneca, [member], msg, 'c')
+    }
+    
+    return {member: member, child: child[0], q: q}
   }
 
-
-  remove_member.validate = Object.assign({}, validate_member, {
-    child: Joi.string().required(),
-    kind: Joi.string().required(), // to identify specific membership
-  })
-
-  function remove_member(msg, reply) {
-    const seneca = this
-    work().then(reply).catch(reply)
   
-    async function work() {
-      const member_ent = WE(seneca.make('sys/member'))
-
+  async function remove_member(msg, reply) {
+    const member_ent = this.entity('sys/member')
+    var list = []
+    
+    if(null != msg.id) {
+      const item = await member_ent.load$(msg.id)
+      if(item) {
+        list.push(item)
+      }
+      await member_ent.make$().remove$(msg.id)
+    }
+    else if(null != msg.child && null != msg.kind) {
       // required
       const q = {
         c: msg.child,
@@ -200,72 +169,63 @@ module.exports = function member(options) {
         q.d = msg.code
       }
 
-      const list = await member_ent.list$(q)
+      const found = await member_ent.list$(q)
 
-      for(var i = 0; i < list.length; i++) {
-        await WE(list[i]).remove$()
+      for(var i = 0; i < found.length; i++) {
+        list.push(found)
+        await found[i].remove$()
       }
-
-      return {items:list}
     }
+    
+    return {items:list}
   }
-
   
   update_member.validate = Object.assign({}, validate_member, {
     id: Joi.string().required(),
   })
 
 
-  function update_member(msg, reply) {
-    const seneca = this
-    work().then(reply).catch(reply)
-  
-    async function work() {
-      const member_ent = WE(seneca.make('sys/member'))
+  async function update_member(msg, reply) {
+    const member_ent = this.entity('sys/member')
 
-      // TODO: remove as replaced by role:member,remove:member
-      if(msg.remove) {
-        return await WE(member_ent.make$()).remove$(msg.id)
+    // TODO: remove as replaced by role:member,remove:member
+    //if(msg.remove) {
+    //  return await member_ent.make$().remove$(msg.id)
+    //}
+    //else {
+      var member = await member_ent.make$().load$(msg.id)
+
+      if(member) {
+        member.p = null == msg.parent ? member.p : msg.parent
+        member.c = null == msg.child ? member.c : msg.child
+        member.k = null == msg.kind ? member.k : msg.kind
+        member.d = null == msg.code ? member.d : msg.code
+        member.t = null == msg.tags ? member.t : msg.tags
+        
+        member = await member.save$()
       }
-      else {
-        var member = await WE(member_ent.make$()).load$(msg.id)
 
-        if(member) {
-          member.p = null == msg.parent ? member.p : msg.parent
-          member.c = null == msg.child ? member.c : msg.child
-          member.k = null == msg.kind ? member.k : msg.kind
-          member.d = null == msg.code ? member.d : msg.code
-          member.t = null == msg.tags ? member.t : msg.tags
-          
-          member = await WE(member).save$()
-        }
+      return member
+    //}
+  }
 
-        return member
-      }
-    }
+
+  list_children.validate = Object.assign({}, validate_member, {})
+
+  async function list_children(msg, reply) {
+    return build_list(this,msg,'c')
   }
 
   
-  list_children.validate = Object.assign({}, validate_member, {
-  })
+  list_parents.validate = Object.assign({}, validate_member, {})
 
-  function list_children(msg, reply) {
-    const seneca = this
-    build_list(seneca,msg,'c').then(reply).catch(reply)
-  
-  }
-
-  list_parents.validate = Object.assign({}, validate_member, {
-  })
-
-  function list_parents(msg, reply) {
-    const seneca = this
-    build_list(seneca,msg,'p').then(reply).catch(reply)
+  async function list_parents(msg, reply) {
+    return build_list(this,msg,'p')
   }
 
 
   async function build_list(seneca,msg,type) {
-    const member_ent = WE(seneca.make('sys/member'))
+    const member_ent = seneca.entity('sys/member')
 
     const fields = []
     const q = {}
@@ -320,7 +280,7 @@ module.exports = function member(options) {
     for(var i = 0; i < list.length; i++) {
       var kind = list[i].k
       var canon = opts.kinds[kind][type]
-      var ent = WE(seneca.make(canon))
+      var ent = seneca.entity(canon)
       var entid = list[i][type]
 
       var q = {id:entid}
@@ -343,15 +303,3 @@ module.exports = function member(options) {
 const intern = (module.exports.intern = {
 })
 
-
-function WE(ent) {
-  //const make = ent.make$
-  //ent.make$ = function() {
-  //  return WE(make.apply(ent,arguments))
-  //}
-  ent.load$ = W(ent.load$.bind(ent))
-  ent.save$ = W(ent.save$.bind(ent))
-  ent.list$ = W(ent.list$.bind(ent))
-  ent.remove$ = W(ent.remove$.bind(ent))
-  return ent
-}
