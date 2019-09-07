@@ -6,7 +6,7 @@
 
 const Util = require('util')
 
-const Joi = require('joi')
+const Joi = require('@hapi/joi')
 
 // Semantic Version of sys/member entities
 const SYS_MEMBER_SV = 0
