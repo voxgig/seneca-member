@@ -1,6 +1,6 @@
 {
   "name": "seneca-member",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Seneca plugin for generic membership.",
   "main": "member.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "clean-npm": "rm -rf node_modules package-lock.json",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"`; echo TAG: v$REPO_VERSION; git commit -a -m v$REPO_VERSION; git push; git tag v$REPO_VERSION; git push --tags;",
-    "repo-publish": "npm run repo-tag; npm publish"
+    "repo-publish": "npm run repo-tag; npm publish --access public --registry=http://registry.npmjs.org"
   },
   "repository": {
     "type": "git",
@@ -35,11 +35,11 @@
     "@hapi/lab": "^20.2.2",
     "coveralls": "^3.0.6",
     "prettier": "^1.18.2",
-    "seneca": "^3.15.0",
-    "seneca-entity": "^5.1.0",
+    "seneca": "^3.15.1",
+    "seneca-entity": "^5.1.2",
     "seneca-joi": "^4.1.0",
     "seneca-plugin-validator": "^0.3.0",
-    "seneca-promisify": "^1.0.1"
+    "seneca-promisify": "^1.1.0"
   },
   "dependencies": {
     "@hapi/joi": "^15.1.1"
