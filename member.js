@@ -289,6 +289,7 @@ function member(opts) {
       }
 
       var found = (await ent.list$(q))[0]
+      //var found = await ent.load$(q)
       if(found) {
         out.push(found)
       }
