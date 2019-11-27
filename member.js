@@ -4,13 +4,10 @@
 // TODO: ensure tags don't get obliterated
 // TODO: check kind has been defined
 
-const Util = require("util");
+const Util = require("util")
 
-<<<<<<< HEAD
 const Joi = require('@hapi/joi')
-=======
-const Joi = require("joi");
->>>>>>> d78fe10d40758be88a99a06dea657d70bee43a4b
+
 
 // Semantic Version of sys/member entities
 const SYS_MEMBER_SV = 0;
