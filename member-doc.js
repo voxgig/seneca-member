@@ -2,7 +2,6 @@ const Joi = require('@hapi/joi')
 
 // TODO: complete docs and validations
 
-
 const validate_member = {
   parent: Joi.string().description('Parent entity identifier.'),
   child: Joi.string().description('Child entity identifier.'),
@@ -28,10 +27,15 @@ module.exports = {
   },
 
   add_member: {
-    desc: 'Add child (id) to parent (id) under relationship `kind` (idempotent).',
+    desc:
+      'Add child (id) to parent (id) under relationship `kind` (idempotent).',
     validate: Object.assign({}, validate_member, {
-      parent: Joi.string().required().description('Parent entity identifier.'),
-      child: Joi.string().required().description('Child entity identifier.'),
+      parent: Joi.string()
+        .required()
+        .description('Parent entity identifier.'),
+      child: Joi.string()
+        .required()
+        .description('Child entity identifier.'),
       kind: Joi.string().required()
     })
   },
@@ -53,9 +57,7 @@ module.exports = {
       id: Joi.string(),
       // TODO: Joi OR
       child: Joi.string(),
-      kind: Joi.string(),
+      kind: Joi.string()
     })
-  },
-
-
+  }
 }
