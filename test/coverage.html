@@ -551,7 +551,7 @@
           <div class="failures">0</div>
           <div class="skipped">0</div>
           <div class="test-count">12</div>
-          <div class="duration">1086</div>
+          <div class="duration">1035</div>
       </div>
       <div id="filters">
           <input type="checkbox" checked="" onchange="filter(this)" value="success" id="show-success">
@@ -574,14 +574,14 @@
               <td class="test-title">validate
                   
               </td>
-              <td class="test-duration">11</td>
+              <td class="test-duration">9</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">2</td>
               <td class="test-title">happy
                   
               </td>
-              <td class="test-duration">241</td>
+              <td class="test-duration">255</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">3</td>
@@ -595,63 +595,63 @@
               <td class="test-title">no-dups
                   
               </td>
-              <td class="test-duration">61</td>
+              <td class="test-duration">48</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">5</td>
               <td class="test-title">list-children
                   
               </td>
-              <td class="test-duration">150</td>
+              <td class="test-duration">140</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">6</td>
               <td class="test-title">list-parents
                   
               </td>
-              <td class="test-duration">154</td>
+              <td class="test-duration">135</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">7</td>
               <td class="test-title">fields
                   
               </td>
-              <td class="test-duration">83</td>
+              <td class="test-duration">85</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">8</td>
               <td class="test-title">bad-update
                   
               </td>
-              <td class="test-duration">47</td>
+              <td class="test-duration">35</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">9</td>
               <td class="test-title">update
                   
               </td>
-              <td class="test-duration">70</td>
+              <td class="test-duration">73</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">10</td>
               <td class="test-title">remove
                   
               </td>
-              <td class="test-duration">70</td>
+              <td class="test-duration">71</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">11</td>
               <td class="test-title">kinds
                   
               </td>
-              <td class="test-duration">53</td>
+              <td class="test-duration">40</td>
           </tr>
           <tr class="show  success">
               <td class="test-id">12</td>
               <td class="test-title">intern
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">1</td>
           </tr>
           </tbody>
       </table>
@@ -3162,7 +3162,7 @@
                           <td class="line" data-tooltip>341</td>
                           <td class="lint empty"></td>
                           <td class="hits" data-tooltip></td>
-                          <td class="source">    return !!(msg.child || msg.code)</td>
+                          <td class="source">    return !msg.children &amp;&amp; !!(msg.child || msg.code)</td>
                           
                         </tr>            <tr id="member.js__342" class="hit">
                           <td class="line" data-tooltip>342</td>
@@ -3186,7 +3186,7 @@
                           <td class="line" data-tooltip>345</td>
                           <td class="lint empty"></td>
                           <td class="hits" data-tooltip></td>
-                          <td class="source"><div>    return !!(msg.id || </div><div class="miss false" data-tooltip>msg.child</div><div> || msg.code)</div></td>
+                          <td class="source"><div>    return </div><div class="miss true" data-tooltip>!msg.children</div><div> &amp;&amp; !!(msg.id || </div><div class="miss false" data-tooltip>msg.child</div><div> || msg.code)</div></td>
                           
                         </tr>            <tr id="member.js__346" class="hit">
                           <td class="line" data-tooltip>346</td>

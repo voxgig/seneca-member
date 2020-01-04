@@ -338,10 +338,10 @@ const intern = (module.exports.intern = {
 
   // The code could be a unique child for the parent.
   is_single_member: function(msg) {
-    return !!(msg.child || msg.code)
+    return !msg.children && !!(msg.child || msg.code)
   },
 
   is_single_remove: function(msg) {
-    return !!(msg.id || msg.child || msg.code)
+    return !msg.children && !!(msg.id || msg.child || msg.code)
   }
 })
