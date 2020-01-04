@@ -13,10 +13,7 @@ const Seneca = require('seneca')
 const Plugin = require('..')
 
 
-const W = Util.promisify
-
-
-lab.test('validate', async () => { await W(PluginValidator(Plugin, module)) })
+lab.test('validate', PluginValidator(Plugin, module))
 
 
 lab.test('happy', async () => {
@@ -329,7 +326,7 @@ lab.test('remove', async () => {
 
 
 lab.test('kinds', async () => {
-  await make_instance()
+  var si = await make_instance({validate:true})
     .gate()
     .act('role:member,add:kinds',
          {kinds: { ak0: {p:'p0', c:'c0'}, ak1: {p:'p0', c:'c1'} }},
@@ -351,6 +348,17 @@ lab.test('kinds', async () => {
                       ak1: { p: 'p0', c: 'c1' } } })
          })
     .ready()
+
+  try {
+    si.quiet()
+    await si.post('role:member,add:kinds', {
+      kinds: { k2: {} }
+    })
+    Code.fail('should-not-pass')
+  }
+  catch(e) {
+    expect(e.message).equals('seneca: Action add:kinds,role:member received an invalid message; child "kinds" fails because [child "k2" fails because [child "p" fails because ["p" is required]]]; message content was: { kinds: { k2: {} }, role: \'member\', add: \'kinds\' }.')
+  }
 })
 
 
@@ -415,12 +423,15 @@ function make_instance(flags) {
       .use('promisify')
   
   if(flags.validate) {
-    si.use('seneca-joi')
+    si
+      .use('seneca-doc')
+      .use('seneca-joi')
+
   }
 
   return si
     .use('entity')
-    .use(Plugin, {
+    .use('..', {
       kinds: {
         k0: {
           p: 'foo',

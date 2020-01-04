@@ -4,12 +4,14 @@
   "description": "Seneca plugin for generic membership.",
   "main": "member.js",
   "scripts": {
-    "test": "lab -P test -t 80 -I URL,URLSearchParams,BigUint64Array,BigInt64Array,BigInt",
+    "test": "lab -v -P test -t 80",
+    "doc": "seneca-doc",
     "prettier": "prettier --write --no-semi --single-quote *.js lib/*.js test/*.js",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "clean-npm": "rm -rf node_modules package-lock.json",
-    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"`; echo TAG: v$REPO_VERSION; git commit -a -m v$REPO_VERSION; git push; git tag v$REPO_VERSION; git push --tags;",
-    "repo-publish": "npm run repo-tag; npm publish --access public --registry=http://registry.npmjs.org"
+    "clean": "rm -rf node_modules package-lock.json yarn.lock",
+    "reset": "npm run clean && npm i && npm test",
+    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
+    "repo-publish": "npm run clean && npm i --registry http://registry.npmjs.org && npm run prettier && npm test && npm run doc && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
   },
   "repository": {
     "type": "git",
@@ -24,21 +26,21 @@
   "files": [
     "LICENSE",
     "README.md",
-    "member.js",
-    "lib/errors.js"
+    "member.js"
   ],
   "engines": {
     "node": ">=8"
   },
   "devDependencies": {
-    "@hapi/code": "^6.0.0",
-    "@hapi/lab": "^20.2.2",
-    "coveralls": "^3.0.6",
-    "prettier": "^1.18.2",
-    "seneca": "^3.15.1",
-    "seneca-entity": "^5.1.2",
-    "seneca-joi": "^4.1.0",
-    "seneca-plugin-validator": "^0.3.0",
+    "@hapi/code": "^8.0.1",
+    "@hapi/lab": "^22.0.2",
+    "coveralls": "^3.0.9",
+    "prettier": "^1.19.1",
+    "seneca": "^3.17.0",
+    "seneca-doc": "^1.6.1",
+    "seneca-entity": "^6.0.0",
+    "seneca-joi": "^6.0.0",
+    "seneca-plugin-validator": "^0.5.0",
     "seneca-promisify": "^1.1.0"
   },
   "dependencies": {

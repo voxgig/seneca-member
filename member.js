@@ -40,19 +40,7 @@ function member(opts) {
     code: Joi.string(),
     tags: Joi.array().items(Joi.string())
   };
-
-  add_kinds.validate = {
-    kinds: Joi.object().pattern(
-      /./,
-      Joi.object()
-        .unknown(false)
-        .keys({
-          p: Joi.string().required(),
-          c: Joi.string().required()
-        })
-    )
-  };
-
+  
   async function add_kinds(msg, reply) {
     opts.kinds = Object.assign(opts.kinds, msg.kinds);
     return { kinds: opts.kinds };
@@ -61,12 +49,6 @@ function member(opts) {
   async function get_kinds(msg, reply) {
     return { kinds: opts.kinds };
   }
-
-  add_member.validate = Object.assign({}, validate_member, {
-    parent: Joi.string().required(),
-    child: Joi.string().required(),
-    kind: Joi.string().required()
-  });
 
   // idemptotent
   async function add_member(msg, reply) {
@@ -110,9 +92,6 @@ function member(opts) {
     return member;
   }
 
-  is_member.validate = Object.assign({}, validate_member, {
-    parent: Joi.string().required()
-  });
 
   async function is_member(msg, reply) {
     const member_ent = this.entity("sys/member");
@@ -180,18 +159,9 @@ function member(opts) {
     return { items: list };
   }
 
-  update_member.validate = Object.assign({}, validate_member, {
-    id: Joi.string().required()
-  });
-
   async function update_member(msg, reply) {
     const member_ent = this.entity("sys/member");
 
-    // TODO: remove as replaced by role:member,remove:member
-    //if(msg.remove) {
-    //  return await member_ent.make$().remove$(msg.id)
-    //}
-    //else {
     var member = await member_ent.make$().load$(msg.id);
 
     if (member) {
@@ -205,7 +175,6 @@ function member(opts) {
     }
 
     return member;
-    //}
   }
 
   list_children.validate = Object.assign({}, validate_member, {});
