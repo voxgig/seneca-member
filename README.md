@@ -194,6 +194,10 @@ No description provided.
 <!--END:action-desc-->
 
 
+## Development
+
+* Retain @hapi/joi@15 until seneca-joi is updated
+
 
 [BadgeCoveralls]: https://coveralls.io/repos/voxgig/seneca-member/badge.svg?branch=master&service=github
 [BadgeNpm]: https://badge.fury.io/js/seneca-member.svg

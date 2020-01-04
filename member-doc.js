@@ -26,7 +26,7 @@ module.exports = {
     }
   },
 
-  add_member: {
+  add_member_multi: {
     desc:
       'Add child (id) to parent (id) under relationship `kind` (idempotent).',
     validate: Object.assign({}, validate_member, {
@@ -34,13 +34,16 @@ module.exports = {
         .required()
         .description('Parent entity identifier.'),
       child: Joi.string()
-        .required()
+        //.required()
         .description('Child entity identifier.'),
+      children: Joi.array().items(Joi.string())
+        //.required()
+        .description('Child entity identifiers (optional).'),
       kind: Joi.string().required()
     })
   },
 
-  is_member: {
+  is_member_multi: {
     validate: Object.assign({}, validate_member, {
       parent: Joi.string().required()
     })

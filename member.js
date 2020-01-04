@@ -24,9 +24,11 @@ function member(opts) {
     seneca
       .message('role:member,add:kinds', add_kinds)
       .message('role:member,get:kinds', get_kinds)
-      .message('role:member,add:member', add_member)
-      .message('role:member,is:member', is_member)
-      .message('role:member,remove:member', remove_member)
+      .message('role:member,add:member', intern.make_multi(add_member))
+      .message('role:member,is:member',
+               intern.make_multi(is_member,intern.is_single_member))
+      .message('role:member,remove:member',
+               intern.make_multi(remove_member,intern.is_single_remove))
       .message('role:member,update:member', update_member)
       .message('role:member,list:children', list_children)
       .message('role:member,list:parents', list_parents)
@@ -49,6 +51,28 @@ function member(opts) {
     return { kinds: opts.kinds }
   }
 
+  /*
+  async function add_member(msg, meta, ...rest) {
+    if(msg.child) {
+      return add_member_single.call(this, msg, meta, ...rest)
+    }
+    else if(msg.children) {
+      var members = []
+      for(var cI = 0; cI < msg.children.length; cI++) {
+        var child_msg = {...msg, child:msg.children[cI], children: null}
+        members.push(await add_member_single.call(this, child_msg, meta, ...rest))
+      }
+      return members
+    }
+    // else no action no result
+    else {
+      return null
+    }
+  }
+  */
+
+  
+  
   // idemptotent
   async function add_member(msg) {
     const member_ent = this.entity('sys/member')
@@ -91,6 +115,27 @@ function member(opts) {
     return member
   }
 
+/*
+  async function is_member(msg, meta, ...rest) {
+    // NOTE: code could be a unique child for parent
+    if(msg.child || msg.code) {
+      return is_member_single.call(this, msg, meta, ...rest)
+    }
+    else if(msg.children) {
+      var members = []
+      for(var cI = 0; cI < msg.children.length; cI++) {
+        var child_msg = {...msg, child:msg.children[cI], children: null}
+        members.push(await is_member_single.call(this, child_msg, meta, ...rest))
+      }
+      return members
+    }
+    // else no action no result
+    else {
+      return null
+    }
+  }
+*/
+  
   async function is_member(msg) {
     const member_ent = this.entity('sys/member')
 
@@ -160,6 +205,7 @@ function member(opts) {
   async function update_member(msg) {
     const member_ent = this.entity('sys/member')
 
+    // TODO: support list of ids - need seneca-entity to support this
     var member = await member_ent.make$().load$(msg.id)
 
     if (member) {
@@ -263,4 +309,38 @@ function member(opts) {
   return define_patterns()
 }
 
-// const intern = (module.exports.intern = {})
+const intern = (module.exports.intern = {
+  make_multi: function(single_action, is_single) {
+    
+    var func = async function(msg, meta, ...rest) {
+      if(msg.child || (is_single && is_single(msg))) {
+        return single_action.call(this, msg, meta, ...rest)
+      }
+      else if(msg.children) {
+        var out = []
+        for(var cI = 0; cI < msg.children.length; cI++) {
+          var child_msg = {...msg, child:msg.children[cI], children: null}
+          out.push(await single_action.call(this, child_msg, meta, ...rest))
+        }
+        return out
+      }
+      // else no action no result
+      else {
+        return null
+      }
+    }
+
+    Object.defineProperty(func, "name", { value: single_action.name+'_multi' })
+    return func
+  },
+
+  // The code could be a unique child for the parent.
+  is_single_member: function(msg) {
+    return !!(msg.child || msg.code)
+  },
+
+  is_single_remove: function(msg) {
+    return !!(msg.id || msg.child || msg.code)
+  }
+
+})
