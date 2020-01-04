@@ -88,11 +88,13 @@ Add child (id) to parent (id) under relationship `kind` (idempotent).
 
 * _parent_ : string <i><small>{presence:required}</small></i>
  : Parent entity identifier.
-* _child_ : string <i><small>{presence:required}</small></i>
+* _child_ : string
  : Child entity identifier.
 * _kind_ : string <i><small>{presence:required}</small></i>
 * _code_ : string
 * _tags_ : array <i><small>{sparse:false}</small></i>
+* _children_ : array <i><small>{sparse:false}</small></i>
+ : Child entity identifiers (optional).
 
 
 ----------
@@ -156,17 +158,6 @@ No description provided.
 
 No description provided.
 
-
-#### Parameters
-
-
-* _parent_ : string
- : Parent entity identifier.
-* _child_ : string
-* _kind_ : string
-* _code_ : string
-* _tags_ : array <i><small>{sparse:false}</small></i>
-* _id_ : string
 
 
 ----------

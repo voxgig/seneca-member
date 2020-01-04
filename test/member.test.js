@@ -126,32 +126,36 @@ lab.test('list-children', async () => {
   out = await si.post('role:member,list:children,parent:p3')
   expect(out.items).equal(['c5', 'c6'])
 
-  
   out = await si.post('role:member,list:children,parent:p0,kind:k0')
   expect(out.items).equal(['c0', 'c1', 'c2'])
 
   out = await si.post('role:member,list:children,parent:p0,kind:k0,code:d0')
-      expect(out.items).equal(['c0', 'c1'])
-
-  out = await si.post(
-      'role:member,list:children,parent:p0,kind:k0,code:d0,as:child-id')
   expect(out.items).equal(['c0', 'c1'])
 
   out = await si.post(
-      'role:member,list:children,parent:p0,kind:k0,code:d0,as:member-id')
-        expect(out.items).equal(['m0', 'm1'])
+    'role:member,list:children,parent:p0,kind:k0,code:d0,as:child-id'
+  )
+  expect(out.items).equal(['c0', 'c1'])
 
   out = await si.post(
-      'role:member,list:children,parent:p0,kind:k0,code:d0,as:member')
-        expect(out.items.map(x => x.id)).equal(['m0', 'm1'])
+    'role:member,list:children,parent:p0,kind:k0,code:d0,as:member-id'
+  )
+  expect(out.items).equal(['m0', 'm1'])
 
   out = await si.post(
-      'role:member,list:children,parent:p0,kind:k0,code:d0,as:child')
-        expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100,f3:A}')
-        expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101,f3:B}')
+    'role:member,list:children,parent:p0,kind:k0,code:d0,as:member'
+  )
+  expect(out.items.map(x => x.id)).equal(['m0', 'm1'])
 
   out = await si.post(
-      'role:member,is:member,parent:p0,child:c0,as:child,fields:["f2"]')
+    'role:member,list:children,parent:p0,kind:k0,code:d0,as:child'
+  )
+  expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100,f3:A}')
+  expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101,f3:B}')
+
+  out = await si.post(
+    'role:member,is:member,parent:p0,child:c0,as:child,fields:["f2"]'
+  )
   expect(out.q).equal({ p: 'p0', c: 'c0' })
   expect(out.member.toString()).equal(
     '$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0],sv:0}'
@@ -160,7 +164,8 @@ lab.test('list-children', async () => {
 
   // assume code is unique
   out = await si.post(
-    'role:member,is:member,parent:p0,code:d0,as:child,fields:["f2"]')
+    'role:member,is:member,parent:p0,code:d0,as:child,fields:["f2"]'
+  )
   expect(out.q).equal({ p: 'p0', d: 'd0' })
   expect(out.member.toString()).equal(
     '$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0],sv:0}'
@@ -169,23 +174,22 @@ lab.test('list-children', async () => {
 
   // child and code
   out = await si.post(
-    'role:member,is:member,parent:p0,child:c0,code:d0,as:child,fields:["f2"]')
+    'role:member,is:member,parent:p0,child:c0,code:d0,as:child,fields:["f2"]'
+  )
   expect(out.member.toString()).equal(
     '$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0],sv:0}'
   )
 
   // nothing can match this
-  out = await si.post(
-    'role:member,is:member,parent:p0,as:child,fields:["f2"]')
+  out = await si.post('role:member,is:member,parent:p0,as:child,fields:["f2"]')
   expect(out).equal(null)
 
-
   out = await si.post(
-    'role:member,is:member,parent:p3,children:["c4","c5","c6"]')
+    'role:member,is:member,parent:p3,children:["c4","c5","c6"]'
+  )
   //console.log(out)
-  expect(out.map(x=>!!x.member)).equal([false,true,true])
+  expect(out.map(x => !!x.member)).equal([false, true, true])
 
-  
   out = await si.post('role:member,list:children,parent:not-a-parent')
   expect(out.items).equal([])
 
@@ -193,18 +197,17 @@ lab.test('list-children', async () => {
   expect(out.items).equal([])
 
   out = await si.post(
-    'role:member,list:children,parent:p0,kind:k0,code:not-a-code')
+    'role:member,list:children,parent:p0,kind:k0,code:not-a-code'
+  )
   expect(out.items).equal([])
-
 })
 
 lab.test('list-parents', async () => {
   var si = await make_data0(make_instance())
   var out
-  
+
   out = await si.post('role:member,list:parents')
   expect(out.items).equal(['p0', 'p1', 'p2', 'p3'])
-
 
   out = await si.post('role:member,list:parents,child:c0')
   expect(out.items).equal(['p0', 'p1'])
@@ -219,19 +222,23 @@ lab.test('list-parents', async () => {
   expect(out.items).equal(['p0', 'p1'])
 
   out = await si.post(
-    'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent-id')
-    expect(out.items).equal(['p0', 'p1'])
+    'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent-id'
+  )
+  expect(out.items).equal(['p0', 'p1'])
 
   out = await si.post(
-    'role:member,list:parents,child:c0,kind:k0,code:d0,as:member-id')
+    'role:member,list:parents,child:c0,kind:k0,code:d0,as:member-id'
+  )
   expect(out.items).equal(['m0', 'm4'])
 
   out = await si.post(
-    'role:member,list:parents,child:c0,kind:k0,code:d0,as:member')
+    'role:member,list:parents,child:c0,kind:k0,code:d0,as:member'
+  )
   expect(out.items.map(x => x.id)).equal(['m0', 'm4'])
 
   out = await si.post(
-    'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent')
+    'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent'
+  )
   expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f0:0,f1:a}')
   expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f0:1,f1:b}')
 })
@@ -244,13 +251,15 @@ lab.test('fields', async () => {
 
   out = await si.post(
     'role:member,list:children,parent:p0,kind:k0,code:d0,as:child',
-    { fields: ['f2'] })
+    { fields: ['f2'] }
+  )
   expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100}')
   expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101}')
 
   out = await si.post(
     'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent',
-    { fields: ['f1'] })
+    { fields: ['f1'] }
+  )
   expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f1:a}')
   expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f1:b}')
 })
@@ -331,19 +340,19 @@ lab.test('remove', async () => {
     child: 'c0',
     kind: 'k0',
     code: 'd0',
-    tags: ['a','b']
+    tags: ['a', 'b']
   })
   expect(m0.data$()).equal({
-    'entity$': { zone: undefined, base: 'sys', name: 'member' },
+    entity$: { zone: undefined, base: 'sys', name: 'member' },
     p: 'p0',
     c: 'c0',
     k: 'k0',
     d: 'd0',
-    t: ['a','b'],
+    t: ['a', 'b'],
     sv: 0,
     id: 'm0'
   })
-  
+
   const m1 = await si.post('role:member,add:member', {
     id: 'm1',
     parent: 'p0',
@@ -352,7 +361,7 @@ lab.test('remove', async () => {
     code: 'd0'
   })
   expect(m1.data$()).equal({
-    'entity$': { zone: undefined, base: 'sys', name: 'member' },
+    entity$: { zone: undefined, base: 'sys', name: 'member' },
     p: 'p0',
     c: 'c1',
     k: 'k0',
@@ -361,7 +370,7 @@ lab.test('remove', async () => {
     sv: 0,
     id: 'm1'
   })
-  
+
   var list = await si.post('role:member,list:children,parent:p0')
   expect(list.items).equal(['c0', 'c1'])
 
@@ -410,10 +419,10 @@ lab.test('remove', async () => {
 lab.test('kinds', async () => {
   var si = await make_instance({ validate: true })
   var out
-  
-  out = await si.post(
-    'role:member,add:kinds',
-    { kinds: { ak0: { p: 'p0', c: 'c0' }, ak1: { p: 'p0', c: 'c1' } } })
+
+  out = await si.post('role:member,add:kinds', {
+    kinds: { ak0: { p: 'p0', c: 'c0' }, ak1: { p: 'p0', c: 'c1' } }
+  })
   expect(out).exist()
   expect(out).includes({
     kinds: {
@@ -424,8 +433,7 @@ lab.test('kinds', async () => {
     }
   })
 
-  out = await si.post(
-    'role:member,get:kinds')
+  out = await si.post('role:member,get:kinds')
   expect(out).exist()
   expect(out).includes({
     kinds: {
@@ -449,16 +457,14 @@ lab.test('kinds', async () => {
   }
 })
 
-
 lab.test('intern', async () => {
   expect(Plugin.intern).exists()
 
   expect(Plugin.intern.is_single_member({})).false()
-  expect(Plugin.intern.is_single_member({child:1})).true()
-  expect(Plugin.intern.is_single_member({code:2})).true()
-  expect(Plugin.intern.is_single_member({child:1,code:2})).true()
+  expect(Plugin.intern.is_single_member({ child: 1 })).true()
+  expect(Plugin.intern.is_single_member({ code: 2 })).true()
+  expect(Plugin.intern.is_single_member({ child: 1, code: 2 })).true()
 })
-
 
 async function make_data0(si) {
   const foo_ent = si.entity('foo')
@@ -565,20 +571,20 @@ async function make_data0(si) {
 
   var ma0 = await si.post('role:member,add:member', {
     parent: 'p3',
-    children: ['c5','c6'],
+    children: ['c5', 'c6'],
     kind: 'k3',
     code: 'd4',
-    tags: ['t4','t5']
+    tags: ['t4', 't5']
   })
   expect(ma0.length).equals(2)
 
-  expect(await si.post('role:member,add:member', {
-    parent: '~',
-    kind: '~',
-    code: '~',
-  })).equal(null)
-
-
+  expect(
+    await si.post('role:member,add:member', {
+      parent: '~',
+      kind: '~',
+      code: '~'
+    })
+  ).equal(null)
 
   expect(m0).exists()
   expect(m1).exists()
@@ -587,7 +593,7 @@ async function make_data0(si) {
   expect(m4).exists()
   expect(m5).exists()
   expect(m6).exists()
-  
+
   return si
 }
 

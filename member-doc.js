@@ -36,7 +36,8 @@ module.exports = {
       child: Joi.string()
         //.required()
         .description('Child entity identifier.'),
-      children: Joi.array().items(Joi.string())
+      children: Joi.array()
+        .items(Joi.string())
         //.required()
         .description('Child entity identifiers (optional).'),
       kind: Joi.string().required()
