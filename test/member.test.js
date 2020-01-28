@@ -452,7 +452,7 @@ lab.test('kinds', async () => {
     Code.fail('should-not-pass')
   } catch (e) {
     expect(e.message).equals(
-      'seneca: Action add:kinds,role:member received an invalid message; child "kinds" fails because [child "k2" fails because [child "p" fails because ["p" is required]]]; message content was: { kinds: { k2: {} }, role: \'member\', add: \'kinds\' }.'
+      "seneca: Action add:kinds,role:member received an invalid message; \"kinds.k2.p\" is required; message content was: { kinds: { k2: {} }, role: 'member', add: 'kinds' }."
     )
   }
 })

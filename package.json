@@ -1,6 +1,6 @@
 {
   "name": "seneca-member",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Seneca plugin for generic membership.",
   "main": "member.js",
   "scripts": {
@@ -33,17 +33,17 @@
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",
-    "@hapi/lab": "^21.0.0",
+    "@hapi/lab": "^22.0.3",
     "coveralls": "^3.0.9",
     "prettier": "^1.19.1",
-    "seneca": "^3.17.0",
-    "seneca-doc": "^1.6.1",
-    "seneca-entity": "^6.0.0",
-    "seneca-joi": "^6.0.0",
-    "seneca-plugin-validator": "^0.5.0",
-    "seneca-promisify": "^1.1.0"
+    "seneca": "^3.20.0",
+    "seneca-doc": "^2.0.1",
+    "seneca-entity": "^7.0.0",
+    "seneca-joi": "^7.0.1",
+    "seneca-plugin-validator": "^0.6.0",
+    "seneca-promisify": "^1.2.0"
   },
   "dependencies": {
-    "@hapi/joi": "^15.1.1"
+    "@hapi/joi": "^17.1.0"
   }
 }
