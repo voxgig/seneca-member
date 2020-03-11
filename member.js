@@ -17,7 +17,12 @@ member.defaults = {
   kinds: {}
 }
 
-function member(opts) {
+member.errors = {
+  invalid_as:
+    'Invalid member `as` value (<%=as%>), should be one of: child, parent, child-id, parent-id, member, member-id.'
+}
+
+function member(options) {
   const seneca = this
 
   function define_patterns() {
@@ -25,10 +30,7 @@ function member(opts) {
       .message('role:member,add:kinds', add_kinds)
       .message('role:member,get:kinds', get_kinds)
       .message('role:member,add:member', intern.make_multi(add_member))
-      .message(
-        'role:member,is:member',
-        intern.make_multi(is_member, intern.is_single_member)
-      )
+      .message('role:member,is:member', is_member)
       .message(
         'role:member,remove:member',
         intern.make_multi(remove_member, intern.is_single_remove)
@@ -47,33 +49,13 @@ function member(opts) {
   }
 
   async function add_kinds(msg) {
-    opts.kinds = Object.assign(opts.kinds, msg.kinds)
-    return { kinds: opts.kinds }
+    options.kinds = Object.assign(options.kinds, msg.kinds)
+    return { kinds: options.kinds }
   }
 
   async function get_kinds(msg) {
-    return { kinds: opts.kinds }
+    return { kinds: options.kinds }
   }
-
-  /*
-  async function add_member(msg, meta, ...rest) {
-    if(msg.child) {
-      return add_member_single.call(this, msg, meta, ...rest)
-    }
-    else if(msg.children) {
-      var members = []
-      for(var cI = 0; cI < msg.children.length; cI++) {
-        var child_msg = {...msg, child:msg.children[cI], children: null}
-        members.push(await add_member_single.call(this, child_msg, meta, ...rest))
-      }
-      return members
-    }
-    // else no action no result
-    else {
-      return null
-    }
-  }
-  */
 
   // idemptotent
   async function add_member(msg) {
@@ -117,27 +99,6 @@ function member(opts) {
     return member
   }
 
-  /*
-  async function is_member(msg, meta, ...rest) {
-    // NOTE: code could be a unique child for parent
-    if(msg.child || msg.code) {
-      return is_member_single.call(this, msg, meta, ...rest)
-    }
-    else if(msg.children) {
-      var members = []
-      for(var cI = 0; cI < msg.children.length; cI++) {
-        var child_msg = {...msg, child:msg.children[cI], children: null}
-        members.push(await is_member_single.call(this, child_msg, meta, ...rest))
-      }
-      return members
-    }
-    // else no action no result
-    else {
-      return null
-    }
-  }
-*/
-
   async function is_member(msg) {
     const member_ent = this.entity('sys/member')
 
@@ -146,8 +107,9 @@ function member(opts) {
       p: msg.parent
     }
 
-    if (msg.child) {
-      q.c = msg.child
+    var msg_children = intern.resolve_children(msg)
+    if (msg_children) {
+      q.c = msg_children
     }
 
     if (msg.kind) {
@@ -158,14 +120,30 @@ function member(opts) {
       q.d = msg.code
     }
 
-    const member = await member_ent.load$(q)
-    var child = []
+    var valid_query = null != q.c || null != q.d
 
-    if (member && 'child' === msg.as) {
-      child = await load_items(seneca, [member], msg, 'c')
+    const members = valid_query ? await member_ent.list$(q) : []
+    var children = []
+
+    var membership = {}
+    for (var mI = 0; mI < members.length; mI++) {
+      membership[members[mI].c] = true
     }
 
-    return { member: member, child: child[0], q: q }
+    if (0 < members.length && 'child' === msg.as) {
+      children = await intern.load_items(seneca, options, members, msg, 'c')
+    }
+
+    var out = {
+      q: q,
+      member: members[0],
+      child: children[0],
+      members: members,
+      children: children,
+      membership: membership
+    }
+
+    return out
   }
 
   async function remove_member(msg) {
@@ -278,40 +256,56 @@ function member(opts) {
 
     // Return referenced entities
     else if (prefix == msg.as) {
-      list = await load_items(seneca, list, msg, type)
+      list = await intern.load_items(seneca, options, list, msg, type)
+    } else {
+      seneca.fail('invalid_as', { as: msg.as })
     }
 
     return { items: list }
-  }
-
-  async function load_items(seneca, list, msg, type) {
-    const out = []
-
-    for (var i = 0; i < list.length; i++) {
-      var kind = list[i].k
-      var canon = opts.kinds[kind][type]
-      var ent = seneca.entity(canon)
-      var entid = list[i][type]
-
-      var q = { id: entid }
-      if (msg.fields) {
-        q.fields$ = msg.fields
-      }
-
-      var found = (await ent.list$(q))[0]
-      //var found = await ent.load$(q)
-      if (found) {
-        out.push(found)
-      }
-    }
-
-    return out
   }
 
   return define_patterns()
 }
 
 const intern = (module.exports.intern = {
+  load_items: async function(seneca, options, list, msg, type) {
+    var out = []
+
+    if (0 < list.length) {
+      // assume list is all of same kind
+      var kind = list[0].k
+      var canon = options.kinds[kind][type]
+      var ent = seneca.entity(canon)
+
+      var q = { id: list.map(x => x[type]) }
+      if (msg.fields) {
+        q.fields$ = msg.fields
+      }
+
+      out = await ent.list$(q)
+    }
+
+    return out
+  },
+
+  resolve_children: function(msg) {
+    var children = null
+
+    // children has precedence
+    if (msg.children) {
+      children = msg.children
+    } else if (msg.child) {
+      children = msg.child
+    }
+
+    // always convert to list
+    if (null != children && !Array.isArray(children)) {
+      children = [children]
+    }
+
+    return children
+  },
+
   make_multi: function(single_action, is_single) {
     var func = async function(msg, meta, ...rest) {
       if (msg.child || (is_single && is_single(msg))) {

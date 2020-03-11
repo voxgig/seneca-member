@@ -153,10 +153,24 @@ lab.test('list-children', async () => {
   expect(out.items[0].toString()).equal('$-/-/bar;id=c0;{f2:100,f3:A}')
   expect(out.items[1].toString()).equal('$-/-/bar;id=c1;{f2:101,f3:B}')
 
+  // just get child ids
+  out = await si.post('role:member,list:children,parent:p0,kind:k0,code:d0')
+  //console.log(out)
+  expect(out).equal({ items: ['c0', 'c1'] })
+
+  try {
+    await si.post(
+      'role:member,list:children,parent:p0,kind:k0,code:d0,as:not-a-valid-thing'
+    )
+    Code.fail()
+  } catch (e) {
+    expect(e.code).equal('invalid_as')
+  }
+
   out = await si.post(
     'role:member,is:member,parent:p0,child:c0,as:child,fields:["f2"]'
   )
-  expect(out.q).equal({ p: 'p0', c: 'c0' })
+  expect(out.q).equal({ p: 'p0', c: ['c0'] })
   expect(out.member.toString()).equal(
     '$-/sys/member;id=m0;{p:p0,c:c0,k:k0,d:d0,t:[t0],sv:0}'
   )
@@ -182,13 +196,21 @@ lab.test('list-children', async () => {
 
   // nothing can match this
   out = await si.post('role:member,is:member,parent:p0,as:child,fields:["f2"]')
-  expect(out).equal(null)
+  expect(out).equal({
+    q: { p: 'p0' },
+    member: undefined,
+    child: undefined,
+    members: [],
+    children: [],
+    membership: {}
+  })
 
   out = await si.post(
     'role:member,is:member,parent:p3,children:["c4","c5","c6"]'
   )
   //console.log(out)
-  expect(out.map(x => !!x.member)).equal([false, true, true])
+  //expect(out.map(x => !!x.member)).equal([false, true, true])
+  expect(out.membership).equals({ c5: true, c6: true })
 
   out = await si.post('role:member,list:children,parent:not-a-parent')
   expect(out.items).equal([])
@@ -403,6 +425,13 @@ lab.test('remove', async () => {
     kind: 'k1',
     code: 'd1'
   })
+  await si.post('role:member,add:member', {
+    id: 'm2c',
+    parent: 'p3',
+    child: 'c3',
+    kind: 'k1',
+    code: 'd1'
+  })
 
   list = await si.post('role:member,list:parents,child:c2,kind:k1,code:d1')
   expect(list.items).equal(['p1', 'p2'])
@@ -414,6 +443,23 @@ lab.test('remove', async () => {
 
   list = await si.post('role:member,list:children,parent:p2')
   expect(list.items).equal([])
+
+  // won't delete if not enough info
+
+  list = await si.post('role:member,list:children,parent:p3')
+  expect(list.items).equal(['c3'])
+
+  await si.post(
+    'role:member,remove:member,parent:p3,child:not-c3,kind:k1,code:d1'
+  )
+
+  list = await si.post('role:member,list:children,parent:p3')
+  expect(list.items).equal(['c3'])
+
+  await si.post('role:member,remove:member,parent:p3,kind:k1,code:d1')
+
+  list = await si.post('role:member,list:children,parent:p3')
+  expect(list.items).equal(['c3'])
 })
 
 lab.test('kinds', async () => {
@@ -460,10 +506,20 @@ lab.test('kinds', async () => {
 lab.test('intern', async () => {
   expect(Plugin.intern).exists()
 
+  expect(await Plugin.intern.load_items(null, null, [])).equals([])
+
   expect(Plugin.intern.is_single_member({})).false()
+  expect(Plugin.intern.is_single_member({ children: [] })).false()
   expect(Plugin.intern.is_single_member({ child: 1 })).true()
   expect(Plugin.intern.is_single_member({ code: 2 })).true()
   expect(Plugin.intern.is_single_member({ child: 1, code: 2 })).true()
+
+  expect(Plugin.intern.is_single_remove({})).false()
+  expect(Plugin.intern.is_single_remove({ children: [] })).false()
+  expect(Plugin.intern.is_single_remove({ child: 1 })).true()
+  expect(Plugin.intern.is_single_remove({ code: 2 })).true()
+  expect(Plugin.intern.is_single_remove({ child: 1, code: 2 })).true()
+  expect(Plugin.intern.is_single_remove({ id: 'id0' })).true()
 })
 
 async function make_data0(si) {
