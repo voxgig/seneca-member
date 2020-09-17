@@ -38,6 +38,7 @@ function member(options) {
       .message('role:member,update:member', update_member)
       .message('role:member,list:children', list_children)
       .message('role:member,list:parents', list_parents)
+      .message('role:member,list:all', list_all)
   }
 
   const validate_member = {
@@ -213,6 +214,11 @@ function member(options) {
     return build_list(this, msg, 'p')
   }
 
+  async function list_all(msg) {
+    return build_list(this, msg, 'a')
+  }
+
+  
   async function build_list(seneca, msg, type) {
     const member_ent = seneca.entity('sys/member')
 
@@ -232,15 +238,23 @@ function member(options) {
       q.d = msg.code
     }
 
+    
     var list = await member_ent.list$(q)
 
-    var seen = {}
-    list = list.filter(x => (seen[x[type]] ? false : (seen[x[type]] = true)))
-
+    if('a' != type) {
+      var seen = {}
+      list = list.filter(x => (seen[x[type]] ? false : (seen[x[type]] = true)))
+      //console.log('Q',q, list.length)
+    }
+    
     const prefix = 'c' === type ? 'child' : 'parent'
 
+    if ('a' == type) {
+      // use list as is
+    }
+
     // Return referenced entity ids
-    if (null == msg.as || prefix + '-id' == msg.as) {
+    else if (null == msg.as || prefix + '-id' == msg.as) {
       list = list.map(x => x[type])
     }
 

@@ -263,6 +263,12 @@ lab.test('list-parents', async () => {
   )
   expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f0:0,f1:a}')
   expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f0:1,f1:b}')
+
+  out = await si.post(
+    'role:member,list:all,kind:k0,code:d0'
+  )
+  expect(out.items.length).equal(4)
+  //console.log(out)
 })
 
 // TODO: mem-store needs to support fields$
@@ -388,7 +394,6 @@ lab.test('remove', async () => {
     c: 'c1',
     k: 'k0',
     d: 'd0',
-    t: undefined,
     sv: 0,
     id: 'm1'
   })
