@@ -61,6 +61,7 @@ Seneca()
 * [is:member,role:member](#-ismemberrolemember-)
 * [list:children,role:member](#-listchildrenrolemember-)
 * [list:parents,role:member](#-listparentsrolemember-)
+* [list:all,role:member](#-listallrolemember-)
 * [remove:member,role:member](#-removememberrolemember-)
 * [role:member,update:member](#-rolememberupdatemember-)
 
@@ -147,6 +148,13 @@ No description provided.
 * _kind_ : string
 * _code_ : string
 * _tags_ : array
+
+
+----------
+### &laquo; `list:all,role:member` &raquo;
+
+No description provided.
+
 
 
 ----------

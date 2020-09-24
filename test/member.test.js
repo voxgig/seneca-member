@@ -24,23 +24,23 @@ lab.test('happy', async () => {
         child: 'c0',
         kind: 'group',
         code: 'admin',
-        tags: ['foo', 'bar']
+        tags: ['foo', 'bar'],
       },
-      function(err, out) {
+      function (err, out) {
         expect(out).exist()
         expect(out).includes({
           p: 'p0',
           c: 'c0',
           k: 'group',
           d: 'admin',
-          t: ['foo', 'bar']
+          t: ['foo', 'bar'],
         })
       }
     )
     .act(
       'role:member,is:member',
       { parent: 'p0', child: 'c0', kind: 'group' },
-      function(err, out) {
+      function (err, out) {
         expect(out.member).exists()
       }
     )
@@ -57,23 +57,23 @@ lab.test('validate', async () => {
         child: 'c0',
         kind: 'group',
         code: 'admin',
-        tags: ['foo', 'bar']
+        tags: ['foo', 'bar'],
       },
-      function(err, out) {
+      function (err, out) {
         expect(out).exist()
         expect(out).includes({
           p: 'p0',
           c: 'c0',
           k: 'group',
           d: 'admin',
-          t: ['foo', 'bar']
+          t: ['foo', 'bar'],
         })
       }
     )
     .act(
       'role:member,is:member',
       { parent: 'p0', child: 'c0', kind: 'group' },
-      function(err, out) {
+      function (err, out) {
         expect(out.member).exists()
       }
     )
@@ -87,7 +87,7 @@ lab.test('no-dups', async () => {
     child: 'c0',
     kind: 'group',
     code: 'admin',
-    tags: ['foo', 'bar']
+    tags: ['foo', 'bar'],
   })
 
   expect(out).exist()
@@ -96,7 +96,7 @@ lab.test('no-dups', async () => {
     c: 'c0',
     k: 'group',
     d: 'admin',
-    t: ['foo', 'bar']
+    t: ['foo', 'bar'],
   })
   const id = out.id
 
@@ -105,7 +105,7 @@ lab.test('no-dups', async () => {
     child: 'c0',
     kind: 'group',
     code: 'admin',
-    tags: ['zed']
+    tags: ['zed'],
   })
 
   expect(out).exist()
@@ -145,7 +145,7 @@ lab.test('list-children', async () => {
   out = await si.post(
     'role:member,list:children,parent:p0,kind:k0,code:d0,as:member'
   )
-  expect(out.items.map(x => x.id)).equal(['m0', 'm1'])
+  expect(out.items.map((x) => x.id)).equal(['m0', 'm1'])
 
   out = await si.post(
     'role:member,list:children,parent:p0,kind:k0,code:d0,as:child'
@@ -202,7 +202,7 @@ lab.test('list-children', async () => {
     child: undefined,
     members: [],
     children: [],
-    membership: {}
+    membership: {},
   })
 
   out = await si.post(
@@ -256,7 +256,7 @@ lab.test('list-parents', async () => {
   out = await si.post(
     'role:member,list:parents,child:c0,kind:k0,code:d0,as:member'
   )
-  expect(out.items.map(x => x.id)).equal(['m0', 'm4'])
+  expect(out.items.map((x) => x.id)).equal(['m0', 'm4'])
 
   out = await si.post(
     'role:member,list:parents,child:c0,kind:k0,code:d0,as:parent'
@@ -264,9 +264,7 @@ lab.test('list-parents', async () => {
   expect(out.items[0].toString()).equal('$-/-/foo;id=p0;{f0:0,f1:a}')
   expect(out.items[1].toString()).equal('$-/-/foo;id=p1;{f0:1,f1:b}')
 
-  out = await si.post(
-    'role:member,list:all,kind:k0,code:d0'
-  )
+  out = await si.post('role:member,list:all,kind:k0,code:d0')
   expect(out.items.length).equal(4)
   //console.log(out)
 })
@@ -300,7 +298,7 @@ lab.test('bad-update', async () => {
     await si.post('role:member,add:member', {
       id: 'm0',
       parent: 'p0',
-      child: 'c0'
+      child: 'c0',
     })
     Code.fail('should-not-pass')
   } catch (e) {
@@ -317,7 +315,7 @@ lab.test('update', async () => {
     child: 'c0',
     kind: 'k0',
     code: 'd0',
-    tags: ['t0']
+    tags: ['t0'],
   })
 
   expect(m0.d).equals('d0')
@@ -326,7 +324,7 @@ lab.test('update', async () => {
   const m0x = await si.post('role:member,update:member', {
     id: m0.id,
     code: 'd0x',
-    tags: ['t0x']
+    tags: ['t0x'],
   })
 
   expect(m0x.d).equals('d0x')
@@ -339,7 +337,7 @@ lab.test('update', async () => {
     id: m0.id,
     parent: 'p1',
     child: 'c1',
-    kind: 'k1'
+    kind: 'k1',
   })
 
   expect(m0x2.d).equals('d0x')
@@ -368,7 +366,7 @@ lab.test('remove', async () => {
     child: 'c0',
     kind: 'k0',
     code: 'd0',
-    tags: ['a', 'b']
+    tags: ['a', 'b'],
   })
   expect(m0.data$()).equal({
     entity$: { zone: undefined, base: 'sys', name: 'member' },
@@ -378,7 +376,7 @@ lab.test('remove', async () => {
     d: 'd0',
     t: ['a', 'b'],
     sv: 0,
-    id: 'm0'
+    id: 'm0',
   })
 
   const m1 = await si.post('role:member,add:member', {
@@ -386,7 +384,7 @@ lab.test('remove', async () => {
     parent: 'p0',
     child: 'c1',
     kind: 'k0',
-    code: 'd0'
+    code: 'd0',
   })
   expect(m1.data$()).equal({
     entity$: { zone: undefined, base: 'sys', name: 'member' },
@@ -395,7 +393,7 @@ lab.test('remove', async () => {
     k: 'k0',
     d: 'd0',
     sv: 0,
-    id: 'm1'
+    id: 'm1',
   })
 
   var list = await si.post('role:member,list:children,parent:p0')
@@ -421,21 +419,21 @@ lab.test('remove', async () => {
     parent: 'p1',
     child: 'c2',
     kind: 'k1',
-    code: 'd1'
+    code: 'd1',
   })
   await si.post('role:member,add:member', {
     id: 'm2b',
     parent: 'p2',
     child: 'c2',
     kind: 'k1',
-    code: 'd1'
+    code: 'd1',
   })
   await si.post('role:member,add:member', {
     id: 'm2c',
     parent: 'p3',
     child: 'c3',
     kind: 'k1',
-    code: 'd1'
+    code: 'd1',
   })
 
   list = await si.post('role:member,list:parents,child:c2,kind:k1,code:d1')
@@ -472,7 +470,7 @@ lab.test('kinds', async () => {
   var out
 
   out = await si.post('role:member,add:kinds', {
-    kinds: { ak0: { p: 'p0', c: 'c0' }, ak1: { p: 'p0', c: 'c1' } }
+    kinds: { ak0: { p: 'p0', c: 'c0' }, ak1: { p: 'p0', c: 'c1' } },
   })
   expect(out).exist()
   expect(out).includes({
@@ -480,8 +478,8 @@ lab.test('kinds', async () => {
       k0: { p: 'foo', c: 'bar' },
       k1: { p: 'foo', c: 'zed' },
       ak0: { p: 'p0', c: 'c0' },
-      ak1: { p: 'p0', c: 'c1' }
-    }
+      ak1: { p: 'p0', c: 'c1' },
+    },
   })
 
   out = await si.post('role:member,get:kinds')
@@ -491,14 +489,14 @@ lab.test('kinds', async () => {
       k0: { p: 'foo', c: 'bar' },
       k1: { p: 'foo', c: 'zed' },
       ak0: { p: 'p0', c: 'c0' },
-      ak1: { p: 'p0', c: 'c1' }
-    }
+      ak1: { p: 'p0', c: 'c1' },
+    },
   })
 
   try {
     si.quiet()
     await si.post('role:member,add:kinds', {
-      kinds: { k2: {} }
+      kinds: { k2: {} },
     })
     Code.fail('should-not-pass')
   } catch (e) {
@@ -532,40 +530,16 @@ async function make_data0(si) {
   const bar_ent = si.entity('bar')
   const zed_ent = si.entity('zed')
 
-  await foo_ent
-    .make$()
-    .data$({ id$: 'p0', f0: 0, f1: 'a' })
-    .save$()
-  await foo_ent
-    .make$()
-    .data$({ id$: 'p1', f0: 1, f1: 'b' })
-    .save$()
-  await foo_ent
-    .make$()
-    .data$({ id$: 'p2', f0: 2, f1: 'c' })
-    .save$()
+  await foo_ent.make$().data$({ id$: 'p0', f0: 0, f1: 'a' }).save$()
+  await foo_ent.make$().data$({ id$: 'p1', f0: 1, f1: 'b' }).save$()
+  await foo_ent.make$().data$({ id$: 'p2', f0: 2, f1: 'c' }).save$()
 
-  await bar_ent
-    .make$()
-    .data$({ id$: 'c0', f2: 100, f3: 'A' })
-    .save$()
-  await bar_ent
-    .make$()
-    .data$({ id$: 'c1', f2: 101, f3: 'B' })
-    .save$()
-  await bar_ent
-    .make$()
-    .data$({ id$: 'c2', f2: 102, f3: 'C' })
-    .save$()
-  await bar_ent
-    .make$()
-    .data$({ id$: 'c3', f2: 103, f3: 'D' })
-    .save$()
+  await bar_ent.make$().data$({ id$: 'c0', f2: 100, f3: 'A' }).save$()
+  await bar_ent.make$().data$({ id$: 'c1', f2: 101, f3: 'B' }).save$()
+  await bar_ent.make$().data$({ id$: 'c2', f2: 102, f3: 'C' }).save$()
+  await bar_ent.make$().data$({ id$: 'c3', f2: 103, f3: 'D' }).save$()
 
-  await zed_ent
-    .make$()
-    .data$({ id$: 'c4', f4: 1000, f5: 'aa' })
-    .save$()
+  await zed_ent.make$().data$({ id$: 'c4', f4: 1000, f5: 'aa' }).save$()
 
   const m0 = await si.post('role:member,add:member', {
     id: 'm0',
@@ -573,7 +547,7 @@ async function make_data0(si) {
     child: 'c0',
     kind: 'k0',
     code: 'd0',
-    tags: ['t0']
+    tags: ['t0'],
   })
 
   const m1 = await si.post('role:member,add:member', {
@@ -582,7 +556,7 @@ async function make_data0(si) {
     child: 'c1',
     kind: 'k0',
     code: 'd0',
-    tags: ['t0', 't1']
+    tags: ['t0', 't1'],
   })
 
   const m2 = await si.post('role:member,add:member', {
@@ -591,7 +565,7 @@ async function make_data0(si) {
     child: 'c2',
     kind: 'k0',
     code: 'd1',
-    tags: ['t1', 't2']
+    tags: ['t1', 't2'],
   })
 
   const m3 = await si.post('role:member,add:member', {
@@ -600,7 +574,7 @@ async function make_data0(si) {
     child: 'c3',
     kind: 'k1',
     code: 'd2',
-    tags: ['t0']
+    tags: ['t0'],
   })
 
   const m4 = await si.post('role:member,add:member', {
@@ -609,7 +583,7 @@ async function make_data0(si) {
     child: 'c0',
     kind: 'k0',
     code: 'd0',
-    tags: ['t0']
+    tags: ['t0'],
   })
 
   const m5 = await si.post('role:member,add:member', {
@@ -618,7 +592,7 @@ async function make_data0(si) {
     child: 'c4',
     kind: 'k0',
     code: 'd0',
-    tags: ['t1']
+    tags: ['t1'],
   })
 
   const m6 = await si.post('role:member,add:member', {
@@ -627,7 +601,7 @@ async function make_data0(si) {
     child: 'c2',
     kind: 'k2',
     code: 'd3',
-    tags: ['t3']
+    tags: ['t3'],
   })
 
   var ma0 = await si.post('role:member,add:member', {
@@ -635,7 +609,7 @@ async function make_data0(si) {
     children: ['c5', 'c6'],
     kind: 'k3',
     code: 'd4',
-    tags: ['t4', 't5']
+    tags: ['t4', 't5'],
   })
   expect(ma0.length).equals(2)
 
@@ -643,7 +617,7 @@ async function make_data0(si) {
     await si.post('role:member,add:member', {
       parent: '~',
       kind: '~',
-      code: '~'
+      code: '~',
     })
   ).equal(null)
 
@@ -660,9 +634,7 @@ async function make_data0(si) {
 
 function make_instance(flags) {
   flags = flags || {}
-  var si = Seneca()
-    .test()
-    .use('promisify')
+  var si = Seneca().test().use('promisify')
 
   if (flags.validate) {
     si.use('seneca-doc').use('seneca-joi')
@@ -672,12 +644,12 @@ function make_instance(flags) {
     kinds: {
       k0: {
         p: 'foo',
-        c: 'bar'
+        c: 'bar',
       },
       k1: {
         p: 'foo',
-        c: 'zed'
-      }
-    }
+        c: 'zed',
+      },
+    },
   })
 }

@@ -14,12 +14,12 @@ const SYS_MEMBER_SV = 0
 module.exports = member
 
 member.defaults = {
-  kinds: {}
+  kinds: {},
 }
 
 member.errors = {
   invalid_as:
-    'Invalid member `as` value (<%=as%>), should be one of: child, parent, child-id, parent-id, member, member-id.'
+    'Invalid member `as` value (<%=as%>), should be one of: child, parent, child-id, parent-id, member, member-id.',
 }
 
 function member(options) {
@@ -46,7 +46,7 @@ function member(options) {
     child: Joi.string(),
     kind: Joi.string(),
     code: Joi.string(),
-    tags: Joi.array().items(Joi.string())
+    tags: Joi.array().items(Joi.string()),
   }
 
   async function add_kinds(msg) {
@@ -66,7 +66,7 @@ function member(options) {
       p: msg.parent,
       c: msg.child,
       k: msg.kind,
-      d: msg.code
+      d: msg.code,
     }
     const prev = await member_ent.make$().load$(q)
 
@@ -75,7 +75,7 @@ function member(options) {
     if (prev) {
       member = await prev
         .data$({
-          t: msg.tags
+          t: msg.tags,
         })
         .save$()
     } else {
@@ -85,16 +85,13 @@ function member(options) {
         k: msg.kind,
         d: msg.code,
         t: msg.tags,
-        sv: SYS_MEMBER_SV
+        sv: SYS_MEMBER_SV,
       }
       if (msg.id) {
         data.id$ = msg.id
       }
 
-      member = await member_ent
-        .make$()
-        .data$(data)
-        .save$()
+      member = await member_ent.make$().data$(data).save$()
     }
 
     return member
@@ -105,7 +102,7 @@ function member(options) {
 
     // required
     const q = {
-      p: msg.parent
+      p: msg.parent,
     }
 
     var msg_children = intern.resolve_children(msg)
@@ -141,7 +138,7 @@ function member(options) {
       child: children[0],
       members: members,
       children: children,
-      membership: membership
+      membership: membership,
     }
 
     return out
@@ -161,7 +158,7 @@ function member(options) {
       // required
       const q = {
         c: msg.child,
-        k: msg.kind
+        k: msg.kind,
       }
 
       if (msg.parent) {
@@ -218,7 +215,6 @@ function member(options) {
     return build_list(this, msg, 'a')
   }
 
-  
   async function build_list(seneca, msg, type) {
     const member_ent = seneca.entity('sys/member')
 
@@ -238,15 +234,16 @@ function member(options) {
       q.d = msg.code
     }
 
-    
     var list = await member_ent.list$(q)
 
-    if('a' != type) {
+    if ('a' != type) {
       var seen = {}
-      list = list.filter(x => (seen[x[type]] ? false : (seen[x[type]] = true)))
+      list = list.filter((x) =>
+        seen[x[type]] ? false : (seen[x[type]] = true)
+      )
       //console.log('Q',q, list.length)
     }
-    
+
     const prefix = 'c' === type ? 'child' : 'parent'
 
     if ('a' == type) {
@@ -255,12 +252,12 @@ function member(options) {
 
     // Return referenced entity ids
     else if (null == msg.as || prefix + '-id' == msg.as) {
-      list = list.map(x => x[type])
+      list = list.map((x) => x[type])
     }
 
     // Return sys/member ids
     else if ('member-id' == msg.as) {
-      list = list.map(x => x.id)
+      list = list.map((x) => x.id)
     }
 
     // Return sys/member ents
@@ -282,7 +279,7 @@ function member(options) {
 }
 
 const intern = (module.exports.intern = {
-  load_items: async function(seneca, options, list, msg, type) {
+  load_items: async function (seneca, options, list, msg, type) {
     var out = []
 
     if (0 < list.length) {
@@ -291,7 +288,7 @@ const intern = (module.exports.intern = {
       var canon = options.kinds[kind][type]
       var ent = seneca.entity(canon)
 
-      var q = { id: list.map(x => x[type]) }
+      var q = { id: list.map((x) => x[type]) }
       if (msg.fields) {
         q.fields$ = msg.fields
       }
@@ -302,7 +299,7 @@ const intern = (module.exports.intern = {
     return out
   },
 
-  resolve_children: function(msg) {
+  resolve_children: function (msg) {
     var children = null
 
     // children has precedence
@@ -320,8 +317,8 @@ const intern = (module.exports.intern = {
     return children
   },
 
-  make_multi: function(single_action, is_single) {
-    var func = async function(msg, meta, ...rest) {
+  make_multi: function (single_action, is_single) {
+    var func = async function (msg, meta, ...rest) {
       if (msg.child || (is_single && is_single(msg))) {
         return single_action.call(this, msg, meta, ...rest)
       } else if (msg.children) {
@@ -339,17 +336,17 @@ const intern = (module.exports.intern = {
     }
 
     Object.defineProperty(func, 'name', {
-      value: single_action.name + '_multi'
+      value: single_action.name + '_multi',
     })
     return func
   },
 
   // The code could be a unique child for the parent.
-  is_single_member: function(msg) {
+  is_single_member: function (msg) {
     return !msg.children && !!(msg.child || msg.code)
   },
 
-  is_single_remove: function(msg) {
+  is_single_remove: function (msg) {
     return !msg.children && !!(msg.id || msg.child || msg.code)
-  }
+  },
 })
